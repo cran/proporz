@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Flavio Poletti" />
+
+<meta name="date" content="2024-02-22" />
+
+<title>Apportionment scenarios</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Apportionment scenarios</h1>
+<h4 class="author">Flavio Poletti</h4>
+<h4 class="date">2024-02-22</h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>1) Introduction</h2>
+<p>This vignette explores the implementation of different seat
+apportionment scenarios. There are generally two ways to assign seats of
+a parliament: Either you distribute seats within each district
+independently or you distribute seats according to the vote share for
+the whole election region (e.g. on a national level). We will focus on
+the difference in seat shares compared to vote shares these two
+approaches can produce.</p>
+<p><br /></p>
+</div>
+<div id="setup-data" class="section level2">
+<h2>2) Setup data</h2>
+<p>We’ll mainly use the data set for the 2019 Finnish parliamentary
+elections. The <code>finland2019</code> data set contains two
+data.frames: One with the number of votes for each party, the other
+data.frame tells us how many seats (<code>election_mandates</code>) each
+district has.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(proporz)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">str</span>(finland2019)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; List of 2</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt;  $ votes_df         :&#39;data.frame&#39;:   229 obs. of  3 variables:</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt;   ..$ party_name   : chr [1:229] &quot;KOK&quot; &quot;SDP&quot; &quot;VIHR&quot; &quot;PS&quot; ...</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt;   ..$ district_name: chr [1:229] &quot;UUS&quot; &quot;UUS&quot; &quot;HEL&quot; &quot;UUS&quot; ...</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt;   ..$ votes        : int [1:229] 114243 97107 90662 86691 84141 78486 73626 66109 59722 55244 ...</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt;  $ district_seats_df:&#39;data.frame&#39;:   12 obs. of  2 variables:</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt;   ..$ district_name: chr [1:12] &quot;HEL&quot; &quot;HÄM&quot; &quot;KAA&quot; &quot;KES&quot; ...</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt;   ..$ seats        : int [1:12] 22 14 17 10 7 18 19 8 15 36 ...</span></span></code></pre></div>
+<p>To make comparisons easier, we’ll use matrices instead of
+data.frames. We create a <code>votes_matrix</code> from the given
+data.frame.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>votes_matrix <span class="ot">=</span> <span class="fu">pivot_to_matrix</span>(finland2019<span class="sc">$</span>votes_df)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">dim</span>(votes_matrix)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; [1] 44 12</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># Let&#39;s look at all parties with at least 10k votes</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(votes_matrix[<span class="fu">rowSums</span>(votes_matrix) <span class="sc">&gt;</span> <span class="dv">10000</span>,])</span></code></pre></div>
+<table>
+<colgroup>
+<col width="6%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">HEL</th>
+<th align="right">HÄM</th>
+<th align="right">KAA</th>
+<th align="right">KES</th>
+<th align="right">LAP</th>
+<th align="right">OUL</th>
+<th align="right">PIR</th>
+<th align="right">SAT</th>
+<th align="right">SKA</th>
+<th align="right">UUS</th>
+<th align="right">VAA</th>
+<th align="right">VAR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">KD</td>
+<td align="right">7253</td>
+<td align="right">11733</td>
+<td align="right">10875</td>
+<td align="right">8774</td>
+<td align="right">1077</td>
+<td align="right">5728</td>
+<td align="right">17180</td>
+<td align="right">3361</td>
+<td align="right">17389</td>
+<td align="right">14912</td>
+<td align="right">16741</td>
+<td align="right">5121</td>
+</tr>
+<tr class="even">
+<td align="left">KESK</td>
+<td align="right">11015</td>
+<td align="right">20892</td>
+<td align="right">40715</td>
+<td align="right">30597</td>
+<td align="right">29145</td>
+<td align="right">78486</td>
+<td align="right">26536</td>
+<td align="right">20878</td>
+<td align="right">50459</td>
+<td align="right">35348</td>
+<td align="right">50053</td>
+<td align="right">29796</td>
+</tr>
+<tr class="odd">
+<td align="left">KOK</td>
+<td align="right">84141</td>
+<td align="right">39511</td>
+<td align="right">44224</td>
+<td align="right">19707</td>
+<td align="right">11243</td>
+<td align="right">28382</td>
+<td align="right">55244</td>
+<td align="right">17666</td>
+<td align="right">27699</td>
+<td align="right">114243</td>
+<td align="right">29530</td>
+<td align="right">52367</td>
+</tr>
+<tr class="even">
+<td align="left">NYT</td>
+<td align="right">13529</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1593</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Nyt</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">24778</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">PIR</td>
+<td align="right">5840</td>
+<td align="right">996</td>
+<td align="right">687</td>
+<td align="right">1239</td>
+<td align="right">280</td>
+<td align="right">1244</td>
+<td align="right">2018</td>
+<td align="right">253</td>
+<td align="right">686</td>
+<td align="right">4083</td>
+<td align="right">462</td>
+<td align="right">1244</td>
+</tr>
+<tr class="odd">
+<td align="left">PS</td>
+<td align="right">47276</td>
+<td align="right">43199</td>
+<td align="right">46196</td>
+<td align="right">27851</td>
+<td align="right">17160</td>
+<td align="right">52771</td>
+<td align="right">51819</td>
+<td align="right">30090</td>
+<td align="right">39996</td>
+<td align="right">86691</td>
+<td align="right">42843</td>
+<td align="right">52913</td>
+</tr>
+<tr class="even">
+<td align="left">RKP</td>
+<td align="right">20348</td>
+<td align="right">500</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">112</td>
+<td align="right">432</td>
+<td align="right">327</td>
+<td align="right">178</td>
+<td align="right">0</td>
+<td align="right">49625</td>
+<td align="right">52880</td>
+<td align="right">15238</td>
+</tr>
+<tr class="odd">
+<td align="left">SDP</td>
+<td align="right">52393</td>
+<td align="right">49359</td>
+<td align="right">59722</td>
+<td align="right">29201</td>
+<td align="right">13479</td>
+<td align="right">26588</td>
+<td align="right">66109</td>
+<td align="right">31475</td>
+<td align="right">38274</td>
+<td align="right">97107</td>
+<td align="right">33608</td>
+<td align="right">49156</td>
+</tr>
+<tr class="even">
+<td align="left">SIN</td>
+<td align="right">2056</td>
+<td align="right">821</td>
+<td align="right">3212</td>
+<td align="right">705</td>
+<td align="right">483</td>
+<td align="right">1801</td>
+<td align="right">3342</td>
+<td align="right">0</td>
+<td align="right">4128</td>
+<td align="right">9498</td>
+<td align="right">2470</td>
+<td align="right">1427</td>
+</tr>
+<tr class="odd">
+<td align="left">STL</td>
+<td align="right">1285</td>
+<td align="right">1028</td>
+<td align="right">829</td>
+<td align="right">389</td>
+<td align="right">667</td>
+<td align="right">847</td>
+<td align="right">1371</td>
+<td align="right">199</td>
+<td align="right">769</td>
+<td align="right">2754</td>
+<td align="right">777</td>
+<td align="right">451</td>
+</tr>
+<tr class="even">
+<td align="left">VAS</td>
+<td align="right">42899</td>
+<td align="right">15172</td>
+<td align="right">10371</td>
+<td align="right">12681</td>
+<td align="right">14128</td>
+<td align="right">33820</td>
+<td align="right">24341</td>
+<td align="right">12435</td>
+<td align="right">15908</td>
+<td align="right">26257</td>
+<td align="right">8315</td>
+<td align="right">35481</td>
+</tr>
+<tr class="odd">
+<td align="left">VIHR</td>
+<td align="right">90662</td>
+<td align="right">17354</td>
+<td align="right">23032</td>
+<td align="right">17639</td>
+<td align="right">9706</td>
+<td align="right">20376</td>
+<td align="right">37152</td>
+<td align="right">7461</td>
+<td align="right">21362</td>
+<td align="right">73626</td>
+<td align="right">10515</td>
+<td align="right">25309</td>
+</tr>
+</tbody>
+</table>
+<p>We also create a named vector that defines how many seats each
+district has (<code>district_seats</code>). Note that the order of
+district names in <code>district_seats</code> and columns in
+<code>votes_matrix</code> differ. However, this does not affect the
+analysis as we access districts by name (as does
+<code>biproporz()</code> by the way).</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>district_seats <span class="ot">=</span> finland2019<span class="sc">$</span>district_seats_df<span class="sc">$</span>seats</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">names</span>(district_seats) <span class="ot">&lt;-</span> finland2019<span class="sc">$</span>district_seats_df<span class="sc">$</span>district_name</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>district_seats</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; HEL HÄM KAA KES LAP OUL PIR SAT SKA UUS VAA VAR </span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt;  22  14  17  10   7  18  19   8  15  36  16  17</span></span></code></pre></div>
+<p><br /></p>
+</div>
+<div id="distribute-seats-in-every-district-independently" class="section level2">
+<h2>3) Distribute seats in every district independently</h2>
+<div id="function-to-distribute-seats-in-districts" class="section level3">
+<h3>3.1) Function to distribute seats in districts</h3>
+<p>In Finland and many other jurisdictions, seats are assigned for each
+district independently. There is no biproportional apportionment among
+all districts. The following function, <code>apply_proporz</code>,
+calculates the seat distribution for each district and returns the
+number of seats per party and district as a matrix. The user can specify
+the apportionment method and a quorum threshold.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>apply_proporz <span class="ot">=</span> <span class="cf">function</span>(votes_matrix, district_seats, method, <span class="at">quorum =</span> <span class="dv">0</span>) {</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    seats_matrix <span class="ot">=</span> votes_matrix</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    seats_matrix[] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    </span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="co"># calculate proportional apportionment for each district (matrix column)</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="cf">for</span>(district <span class="cf">in</span> <span class="fu">names</span>(district_seats)) {</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>        seats_matrix[,district] <span class="ot">&lt;-</span> <span class="fu">proporz</span>(votes_matrix[,district],</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>                                           district_seats[district],</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>                                           <span class="at">quorum =</span> quorum,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>                                           <span class="at">method =</span> method)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    }</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="fu">return</span>(seats_matrix)</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="actual-distribution-method-dhondt" class="section level3">
+<h3>3.2) Actual distribution method (D’Hondt)</h3>
+<p>The Finnish election system uses the <em>D’Hondt</em> method. We’ll
+calculate the seat distribution as a baseline to compare it with other
+methods.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>bydistrict_v0 <span class="ot">=</span> <span class="fu">apply_proporz</span>(votes_matrix, district_seats, <span class="st">&quot;d&#39;hondt&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>bydistrict_v0[<span class="fu">rowSums</span>(bydistrict_v0) <span class="sc">&gt;</span> <span class="dv">0</span>,]</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt;           district_name</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; party_name HEL HÄM KAA KES LAP OUL PIR SAT SKA UUS VAA VAR</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt;       KD     0   1   0   0   0   0   1   0   1   1   1   0</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;       KESK   0   1   3   3   3   6   2   1   4   2   4   2</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt;       KOK    6   3   3   1   1   2   4   1   2   9   2   4</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt;       Nyt    0   0   0   0   0   0   0   0   0   1   0   0</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;       PS     3   3   4   2   1   4   4   2   3   6   3   4</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;       RKP    1   0   0   0   0   0   0   0   0   3   4   1</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;       SDP    3   4   5   2   1   2   5   3   3   7   2   3</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;       VAS    3   1   0   1   1   3   1   1   1   2   0   2</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt;       VIHR   6   1   2   1   0   1   2   0   1   5   0   1</span></span></code></pre></div>
+</div>
+<div id="alternative-methods" class="section level3">
+<h3>3.3) Alternative methods</h3>
+<p>We’ll now look at alternative apportionment methods. The
+<em>Sainte-Laguë</em> method (standard rounding) for example is
+impartial to party size. On the other hand, the <em>Huntington–Hill</em>
+method favors small parties. Generally, Huntington-Hill is used with a
+quorum, otherwise all parties with more than zero votes get at least one
+seat. In this example, the quorum is 3% of votes in a district.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>bydistrict_v1 <span class="ot">=</span> <span class="fu">apply_proporz</span>(votes_matrix, district_seats,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                                      <span class="at">method =</span> <span class="st">&quot;sainte-lague&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>bydistrict_v2 <span class="ot">=</span> <span class="fu">apply_proporz</span>(votes_matrix, district_seats,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                                      <span class="at">method =</span> <span class="st">&quot;huntington-hill&quot;</span>, </span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                                      <span class="at">quorum =</span> <span class="fl">0.03</span>)</span></code></pre></div>
+<p>Let’s compare the seat distributions for these three methods. We get
+the number of party seats on the national level with
+<code>rowSums</code>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>df_bydistrict <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>    <span class="at">D.Hondt =</span> <span class="fu">rowSums</span>(bydistrict_v0),</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    <span class="at">Sainte.Lague =</span> <span class="fu">rowSums</span>(bydistrict_v1),</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    <span class="at">Huntington.Hill =</span> <span class="fu">rowSums</span>(bydistrict_v2)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># sort table by D&#39;Hondt seats</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>df_bydistrict <span class="ot">&lt;-</span> df_bydistrict[<span class="fu">order</span>(df_bydistrict[[<span class="dv">1</span>]], <span class="at">decreasing =</span> T),] </span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># print parties with at least one seat</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df_bydistrict[<span class="fu">rowSums</span>(df_bydistrict) <span class="sc">&gt;</span> <span class="dv">0</span>,])</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">D.Hondt</th>
+<th align="right">Sainte.Lague</th>
+<th align="right">Huntington.Hill</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">SDP</td>
+<td align="right">40</td>
+<td align="right">36</td>
+<td align="right">36</td>
+</tr>
+<tr class="even">
+<td align="left">PS</td>
+<td align="right">39</td>
+<td align="right">37</td>
+<td align="right">37</td>
+</tr>
+<tr class="odd">
+<td align="left">KOK</td>
+<td align="right">38</td>
+<td align="right">35</td>
+<td align="right">35</td>
+</tr>
+<tr class="even">
+<td align="left">KESK</td>
+<td align="right">31</td>
+<td align="right">29</td>
+<td align="right">29</td>
+</tr>
+<tr class="odd">
+<td align="left">VIHR</td>
+<td align="right">20</td>
+<td align="right">25</td>
+<td align="right">27</td>
+</tr>
+<tr class="even">
+<td align="left">VAS</td>
+<td align="right">16</td>
+<td align="right">18</td>
+<td align="right">18</td>
+</tr>
+<tr class="odd">
+<td align="left">RKP</td>
+<td align="right">9</td>
+<td align="right">8</td>
+<td align="right">8</td>
+</tr>
+<tr class="even">
+<td align="left">KD</td>
+<td align="right">5</td>
+<td align="right">7</td>
+<td align="right">6</td>
+</tr>
+<tr class="odd">
+<td align="left">Nyt</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">NYT</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">SIN</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>The actual political analysis is better left for people familiar with
+the party system. However, it is fair to say that the election system
+within districts has a significant impact on the number of seats in
+parliament. For example, the party with the most seats changes with
+Sainte-Laguë or Huntington-Hill.</p>
+</div>
+<div id="compare-seat-share-with-vote-share" class="section level3">
+<h3>3.4) Compare seat share with vote share</h3>
+<p>Let’s now compare the vote shares on the national level with the seat
+share in parliament. Since every entry in <code>votes_matrix</code> is
+only one voter, we can simply use the row sums to get the vote shares.
+Otherwise, we’d have to weigh votes in each district according to the
+number of seats. Since disproportionality analysis is not the focus of
+this package, we’ll simply look at the difference in shares for the
+actual distribution method.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>vote_shares <span class="ot">=</span> <span class="fu">rowSums</span>(votes_matrix)<span class="sc">/</span><span class="fu">sum</span>(votes_matrix)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>shares <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    <span class="at">seats =</span> <span class="fu">rowSums</span>(bydistrict_v0)<span class="sc">/</span><span class="fu">sum</span>(district_seats),</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="at">votes =</span> vote_shares </span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>)</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>shares<span class="sc">$</span>difference <span class="ot">&lt;-</span> shares<span class="sc">$</span>seats<span class="sc">-</span>shares<span class="sc">$</span>votes</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>shares <span class="ot">&lt;-</span> <span class="fu">round</span>(shares, <span class="dv">4</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># Only look at parties with at least 0.5 % of votes</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>shares <span class="ot">&lt;-</span> shares[shares<span class="sc">$</span>votes <span class="sc">&gt;</span> <span class="fl">0.005</span>,]</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>shares <span class="ot">&lt;-</span> shares[<span class="fu">order</span>(shares<span class="sc">$</span>difference),]</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>shares</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co">#&gt;       seats  votes difference</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co">#&gt; VIHR 0.1005 0.1154    -0.0149</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co">#&gt; KD   0.0251 0.0391    -0.0140</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co">#&gt; SIN  0.0000 0.0098    -0.0098</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co">#&gt; PIR  0.0000 0.0062    -0.0062</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co">#&gt; Nyt  0.0050 0.0081    -0.0030</span></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a><span class="co">#&gt; VAS  0.0804 0.0821    -0.0017</span></span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a><span class="co">#&gt; RKP  0.0452 0.0455    -0.0003</span></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a><span class="co">#&gt; KESK 0.1558 0.1381     0.0176</span></span>
+<span id="cb8-24"><a href="#cb8-24" tabindex="-1"></a><span class="co">#&gt; KOK  0.1910 0.1707     0.0202</span></span>
+<span id="cb8-25"><a href="#cb8-25" tabindex="-1"></a><span class="co">#&gt; PS   0.1960 0.1756     0.0204</span></span>
+<span id="cb8-26"><a href="#cb8-26" tabindex="-1"></a><span class="co">#&gt; SDP  0.2010 0.1781     0.0229</span></span></code></pre></div>
+<p>The difference between seat and vote share varies among parties from
+-1.5 to +2.3 percentage points.</p>
+<p><br /></p>
+</div>
+</div>
+<div id="biproportional-method" class="section level2">
+<h2>4) Biproportional method</h2>
+<div id="biproportional-party-seats" class="section level3">
+<h3>4.1) Biproportional party seats</h3>
+<p>We’ll now look at biproportional apportionment and whether it better
+matches the seat share with the national vote share. Keep in mind that
+simply using existing data sets with <code>biproporz</code> is not
+really suitable from a modeling perspective. Vote distributions are
+likely to be different if, for example, people know their vote also
+counts on a national level or if smaller parties choose to run in more
+districts.</p>
+<p>With that being said, let’s assume our data set is properly modeled
+already. We need to consider that voters in Finland can only vote for
+<em>one</em> person in each district. They can’t distribute as many
+votes as there are seats in their district among candidates/parties.
+Thus we need to use <code>use_list_votes=FALSE</code> as a parameter in
+<code>biproporz</code>.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>seats_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, </span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                                 district_seats, </span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                                 <span class="at">use_list_votes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co"># show only parties with seats</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>seats_biproportional[<span class="fu">rowSums</span>(seats_biproportional) <span class="sc">&gt;</span> <span class="dv">0</span>,]</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">HEL</th>
+<th align="right">HÄM</th>
+<th align="right">KAA</th>
+<th align="right">KES</th>
+<th align="right">LAP</th>
+<th align="right">OUL</th>
+<th align="right">PIR</th>
+<th align="right">SAT</th>
+<th align="right">SKA</th>
+<th align="right">UUS</th>
+<th align="right">VAA</th>
+<th align="right">VAR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">KD</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">KESK</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">2</td>
+</tr>
+<tr class="odd">
+<td align="left">KOK</td>
+<td align="right">5</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">4</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">7</td>
+<td align="right">2</td>
+<td align="right">4</td>
+</tr>
+<tr class="even">
+<td align="left">KP</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">NYT</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Nyt</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">PIR</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">PS</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">5</td>
+<td align="right">3</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">RKP</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">SDP</td>
+<td align="right">3</td>
+<td align="right">4</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">4</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">6</td>
+<td align="right">2</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">SIN</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">STL</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">VAS</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">VIHR</td>
+<td align="right">5</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">1</td>
+<td align="right">2</td>
+</tr>
+</tbody>
+</table>
+<p>Let’s now look at the difference between vote and seat share.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>vote_shares <span class="ot">=</span> <span class="fu">rowSums</span>(votes_matrix)<span class="sc">/</span><span class="fu">sum</span>(votes_matrix)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>seat_shares <span class="ot">=</span> <span class="fu">rowSums</span>(seats_biproportional)<span class="sc">/</span><span class="fu">sum</span>(seats_biproportional)</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">range</span>(vote_shares <span class="sc">-</span> seat_shares)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt; [1] -0.005144852  0.002429257</span></span></code></pre></div>
+<p>As we can see, the difference between vote and seat share ranges from
+-0.5 to +0.2 percentage point. Biproportional apportionment matches the
+national vote share better than apportionment by district. This is
+expected however, since biproportional apportionment actually considers
+the national vote share. Discussing the pros and cons of a regional
+representation compared to a priority on national vote shares is not
+within the scope of this vignette. The following chunk shows the
+differen</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>seat_changes <span class="ot">=</span> seats_biproportional<span class="sc">-</span>bydistrict_v0</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(seat_changes[<span class="fu">rowSums</span>(<span class="fu">abs</span>(seat_changes)) <span class="sc">&gt;</span> <span class="dv">0</span>,<span class="fu">colSums</span>(<span class="fu">abs</span>(seat_changes))<span class="sc">&gt;</span><span class="dv">0</span>])</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">HEL</th>
+<th align="right">KAA</th>
+<th align="right">KES</th>
+<th align="right">LAP</th>
+<th align="right">OUL</th>
+<th align="right">PIR</th>
+<th align="right">SAT</th>
+<th align="right">SKA</th>
+<th align="right">UUS</th>
+<th align="right">VAA</th>
+<th align="right">VAR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">KD</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">KESK</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">KOK</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">-2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">KP</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">NYT</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Nyt</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">PIR</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">PS</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+</tr>
+<tr class="odd">
+<td align="left">RKP</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">SDP</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">SIN</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">STL</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">VAS</td>
+<td align="right">-1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">-1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">VIHR</td>
+<td align="right">-1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="distribute-seats-among-districts-as-well" class="section level3">
+<h3>4.2) Distribute seats among districts as well</h3>
+<p>Normally the number of seats per district is defined before an
+election, based on census data. However, you <em>could</em> also assign
+the number of seats per district, based on the actual votes cast in
+every district. This way, each districts seat share is proportional to
+its vote share. To do this, we use the total number of seats for the
+<code>district_seats</code> parameter.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>full_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, </span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>                                <span class="at">district_seats =</span> <span class="fu">sum</span>(district_seats),</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                                <span class="at">use_list_votes =</span> F)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co"># party seat distribution has not changed</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">rowSums</span>(full_biproportional) <span class="sc">-</span> <span class="fu">rowSums</span>(seats_biproportional)</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt;   Asyl   E117   E118   E154   E168   E169   E185   E191   E192   E287   E491 </span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt;      0      0      0      0      0      0      0      0      0      0      0 </span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt;   E492   E493    EOP     FP     IP     KD   KESK    KOK     KP    KTP   LIBE </span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;      0      0      0      0      0      0      0      0      0      0      0 </span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt;    LII   LIIK     LN   LNLY    LNY   LNYL    NYT    Nyt    PEL    PIR     PS </span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt;      0      0      0      0      0      0      0      0      0      0      0 </span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt;    REF    RKP    RLI Reform    SDP    SIN    SKE    SKP    STL    VAS   VIHR </span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt;      0      0      0      0      0      0      0      0      0      0      0</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co"># district seat distribution is different</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="fu">colSums</span>(full_biproportional) <span class="sc">-</span> <span class="fu">colSums</span>(seats_biproportional)</span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; HEL HÄM KAA KES LAP OUL PIR SAT SKA UUS VAA VAR </span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt;   3  -1  -1   0   0  -1   0   0  -1   0   0   1</span></span></code></pre></div>
+<p>As we can see, the number of party seats does not change. However,
+districts where more people voted get a higher share of the seats. 2
+districts gain seats, 4 districts lose a seat.</p>
+<p><br /></p>
+</div>
+</div>
+<div id="effect-of-a-system-change-on-seat-distribution" class="section level2">
+<h2>5) Effect of a system change on seat distribution</h2>
+<p>As a last example, we’ll look at the changes in seat distribution
+biproportional apportionment had in the 2020 parliament election in the
+Swiss canton of Uri. In Uri, 2020 was the first year the cantonal
+parliament was elected with biproportional apportionment for some
+municipalities. Previously, these four municipalities used the
+<em>Hagenbach-Bischoff</em> method. We’ll ignore all other
+municipalities which use a majoritarian electoral system.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>seats_old_system <span class="ot">=</span> <span class="fu">apply_proporz</span>(uri2020<span class="sc">$</span>votes_matrix, uri2020<span class="sc">$</span>seats_vector, <span class="st">&quot;hagenbach-bischoff&quot;</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>seats_new_system <span class="ot">=</span> <span class="fu">biproporz</span>(uri2020<span class="sc">$</span>votes_matrix, uri2020<span class="sc">$</span>seats_vector)</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>seats_new_system<span class="sc">-</span>seats_old_system</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt;      Altdorf Bürglen Erstfeld Schattdorf</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; CVP        1       0        0          0</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; SPGB      -1       0        0          0</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; FDP        0       0        0          0</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; SVP        0       0        0          0</span></span></code></pre></div>
+<p>Compared to the previous election system there was a change of one
+seat (out of 37).</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
