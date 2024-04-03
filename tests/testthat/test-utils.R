@@ -24,7 +24,7 @@ test_that("quorum", {
 test_that("stupid pivot functions", {
     df0 = data.frame(id = c("a", "a", "a", "a", "b", "b"),
                      key = c("w", "x", "y", "z", "x", "y"),
-                     value = 1:6, stringsAsFactors = F)
+                     value = 1:6, stringsAsFactors = FALSE)
 
     matrix1 = pivot_to_matrix(df0)
     expect_equal(pivot_to_matrix(df0[c(2,1,3)]),
@@ -40,9 +40,23 @@ test_that("stupid pivot functions", {
 
     expect_equal(colnames(pivot_to_df(unname(matrix1), "val")),
                  c("row", "col", "val"))
+
+    matrix2 = matrix(1:16, 4, 4)
+    expect_equal(colnames(pivot_to_df(matrix2)), c("row", "col", "values"))
+    matrix3 = matrix2
+    colnames(matrix3) <- as.character(1:4)
+    rownames(matrix3) <- c("A", "B", "C", "D")
+    expect_equal(colnames(pivot_to_df(matrix3)), c("row", "col", "values"))
 })
 
 test_that("print", {
     M = biproporz(matrix(c(51,60,63,98,100,102,45,120,144), nrow = 3), 4:6)
     expect_equal(capture.output(print(M)), capture.output(print(as.matrix(M))))
+})
+
+test_that("collapse_names", {
+    x = c("Abc", "XYZ")
+    y = c(2, 6, 67)
+    expect_equal(collapse_names(x), "'Abc', 'XYZ'")
+    expect_equal(collapse_names(y), "2, 6, 67")
 })

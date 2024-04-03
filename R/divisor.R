@@ -34,12 +34,13 @@ highest_averages_method = function(votes, n_seats, divisors) {
     if(length(divisors) == 1) {
         divisors <- seq(from = divisors, by = 1, length.out = n_seats)
     } else if(length(divisors) != n_seats) {
-        stop("Number of divisors is not equal to the number of seats", call. = F)
+        stop("Number of divisors is not equal to the number of seats", call. = FALSE)
     }
     n_parties = length(votes)
 
     # method
     mtrx_votes = matrix(rep(votes, each=n_seats), ncol = n_parties)
+    colnames(mtrx_votes) <- names(votes)
     mtrx_divisors = matrix(rep(divisors, ncol(mtrx_votes)), ncol = n_parties)
 
     mtrx_quotient = mtrx_votes/mtrx_divisors

@@ -56,7 +56,7 @@ df_bydistrict = data.frame(
 )
 
 # sort table by D'Hondt seats
-df_bydistrict <- df_bydistrict[order(df_bydistrict[[1]], decreasing = T),] 
+df_bydistrict <- df_bydistrict[order(df_bydistrict[[1]], decreasing = TRUE),] 
 
 # print parties with at least one seat
 knitr::kable(df_bydistrict[rowSums(df_bydistrict) > 0,])
@@ -102,7 +102,7 @@ knitr::kable(seat_changes[rowSums(abs(seat_changes)) > 0,colSums(abs(seat_change
 ## ----biprop_seats-------------------------------------------------------------
 full_biproportional = biproporz(votes_matrix, 
                                 district_seats = sum(district_seats),
-                                use_list_votes = F)
+                                use_list_votes = FALSE)
 
 # party seat distribution has not changed
 rowSums(full_biproportional) - rowSums(seats_biproportional)

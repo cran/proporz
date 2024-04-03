@@ -1,11 +1,11 @@
-bisect = function(f, x1, x2, tol = 1e-9) {
+bisect = function(f, x1, x2, tol = 1e-9, max_iterations = 1000) {
     stopifnot(length(x1) == 1, length(x2) == 1, length(tol) == 1, x1 < x2)
     stopifnot((f(x1) <= 0 && f(x2) >= 0) || (f(x1) >= 0 && f(x2) <= 0))
     stopifnot(!is.infinite(x1), !is.infinite(x2))
     stopifnot(!is.nan(x1), !is.nan(x2))
     stopifnot(x1 >= 0, x2 >= 0)
 
-    for(i in 1:1e6) {
+    for(i in seq_len(max_iterations)) {
         x <- (x1 + x2)/2
         if(f(x) == 0 || (x2-x1) < tol) {
             return(x)
@@ -16,7 +16,7 @@ bisect = function(f, x1, x2, tol = 1e-9) {
             x2 <- x
         }
     }
-    stop("Exceeded maximum number of iterations (1e6)") # nocov
+    stop("Exceeded maximum number of iterations (", max_iterations, ")") # nocov
 }
 
 #' Pivot long data.frame to wide matrix and vice versa
@@ -69,9 +69,9 @@ pivot_to_matrix = function(df_long) {
 #' @rdname pivot_to_matrix
 #' @export
 pivot_to_df = function(matrix_wide, value_colname = "values") {
-    if(is.null(dimnames(matrix_wide))) {
-        colnames(matrix_wide) <- 1:ncol(matrix_wide)
-        rownames(matrix_wide) <- 1:nrow(matrix_wide)
+    if(is.null(colnames(matrix_wide))) colnames(matrix_wide) <- 1:ncol(matrix_wide)
+    if(is.null(rownames(matrix_wide))) rownames(matrix_wide) <- 1:nrow(matrix_wide)
+    if(is.null(names(dimnames(matrix_wide)))) {
         names(dimnames(matrix_wide)) <- c("row", "col")
     }
 
@@ -98,7 +98,17 @@ pivot_to_df = function(matrix_wide, value_colname = "values") {
 assert = function(check) {
     if(!all(check)) {
         .x = deparse(substitute(check))
-        stop(.x, " is not TRUE", call. = F)
+        stop(.x, " is not TRUE", call. = FALSE)
     }
     invisible()
+}
+
+collapse_names = function(x) {
+    if(is.character(x)) {
+        y = paste(x, collapse = "', '")
+        y <- paste0("'", y, "'")
+    } else {
+        y = paste(x, collapse = ", ")
+    }
+    return(y)
 }

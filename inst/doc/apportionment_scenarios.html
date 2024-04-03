@@ -693,7 +693,7 @@ the number of party seats on the national level with
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># sort table by D&#39;Hondt seats</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>df_bydistrict <span class="ot">&lt;-</span> df_bydistrict[<span class="fu">order</span>(df_bydistrict[[<span class="dv">1</span>]], <span class="at">decreasing =</span> T),] </span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>df_bydistrict <span class="ot">&lt;-</span> df_bydistrict[<span class="fu">order</span>(df_bydistrict[[<span class="dv">1</span>]], <span class="at">decreasing =</span> <span class="cn">TRUE</span>),] </span>
 <span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
 <span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># print parties with at least one seat</span></span>
 <span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df_bydistrict[<span class="fu">rowSums</span>(df_bydistrict) <span class="sc">&gt;</span> <span class="dv">0</span>,])</span></code></pre></div>
@@ -1087,8 +1087,8 @@ national vote share better than apportionment by district. This is
 expected however, since biproportional apportionment actually considers
 the national vote share. Discussing the pros and cons of a regional
 representation compared to a priority on national vote shares is not
-within the scope of this vignette. The following chunk shows the
-differen</p>
+within the scope of this vignette. The following chunk shows the seat
+changes.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>seat_changes <span class="ot">=</span> seats_biproportional<span class="sc">-</span>bydistrict_v0</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(seat_changes[<span class="fu">rowSums</span>(<span class="fu">abs</span>(seat_changes)) <span class="sc">&gt;</span> <span class="dv">0</span>,<span class="fu">colSums</span>(<span class="fu">abs</span>(seat_changes))<span class="sc">&gt;</span><span class="dv">0</span>])</span></code></pre></div>
@@ -1319,7 +1319,7 @@ its vote share. To do this, we use the total number of seats for the
 <code>district_seats</code> parameter.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>full_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, </span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>                                <span class="at">district_seats =</span> <span class="fu">sum</span>(district_seats),</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                                <span class="at">use_list_votes =</span> F)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                                <span class="at">use_list_votes =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co"># party seat distribution has not changed</span></span>
 <span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">rowSums</span>(full_biproportional) <span class="sc">-</span> <span class="fu">rowSums</span>(seats_biproportional)</span>
