@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Flavio Poletti" />
+
+<meta name="date" content="2025-03-07" />
+
+<title>Modifying biproporz()</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Modifying biproporz()</h1>
+<h4 class="author">Flavio Poletti</h4>
+<h4 class="date">2025-03-07</h4>
+
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>This vignette demonstrates how to modify and extend the default
+implementation of biproportional apportionment in
+<code>biproporz()</code>. We cover the following modifications:</p>
+<ul>
+<li>Applying a quorum to filter seat-eligible parties</li>
+<li>Using alternative predefined apportionment methods</li>
+<li>Implementing a custom rounding function for the lower
+apportionment</li>
+<li>Altering the Winner-Take-One (WTO) method to bypass upper
+apportionment constraints</li>
+</ul>
+<p>We’ll begin by creating a custom dataset: a matrix containing vote
+counts and a vector representing the number of seats per district.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(proporz)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Define a custom dataset for this vignette</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>votes_matrix <span class="ot">=</span> <span class="fu">matrix</span>(</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>    <span class="fu">c</span>( <span class="dv">800</span>, <span class="dv">2802</span>, <span class="dv">4095</span>,  <span class="dv">0</span>, <span class="dv">150</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>      <span class="dv">3900</span>,  <span class="dv">814</span>, <span class="dv">3990</span>, <span class="dv">20</span>,  <span class="dv">60</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>      <span class="dv">1400</span>, <span class="dv">1302</span>, <span class="dv">4305</span>, <span class="dv">10</span>,  <span class="dv">80</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>         <span class="dv">0</span>,    <span class="dv">0</span>,    <span class="dv">0</span>, <span class="dv">50</span>,   <span class="dv">0</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>       <span class="dv">610</span>,  <span class="dv">500</span>, <span class="dv">1001</span>, <span class="dv">40</span>, <span class="dv">120</span>),</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">5</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>    <span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>        <span class="at">party =</span> <span class="fu">c</span>(<span class="st">&quot;A&quot;</span>, <span class="st">&quot;B&quot;</span>, <span class="st">&quot;C&quot;</span>, <span class="st">&quot;D&quot;</span>, <span class="st">&quot;E&quot;</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>        <span class="at">district =</span> <span class="fu">c</span>(<span class="st">&quot;City 1&quot;</span>, <span class="st">&quot;City 2&quot;</span>, <span class="st">&quot;City 3&quot;</span>, <span class="st">&quot;Region 4&quot;</span>, <span class="st">&quot;Region 5&quot;</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>    ))</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>district_seats <span class="ot">=</span> <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">5</span>, <span class="dv">14</span>, <span class="dv">1</span>, <span class="dv">1</span>), <span class="fu">colnames</span>(votes_matrix))</span></code></pre></div>
+<div id="analyzing-the-votes-matrix" class="section level3">
+<h3>Analyzing the Votes Matrix</h3>
+<p>In our example <code>votes_matrix</code>, each voter casts as many
+votes as there are seats in the district. To understand the party
+strength across districts, we calculate the number of <em>voters</em>
+per party and district by weighting the votes matrix with
+<code>weight_list_votes()</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>votes_matrix</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt;     A    800   2802   4095        0      150</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt;     B   3900    814   3990       20       60</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt;     C   1400   1302   4305       10       80</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;     D      0      0      0       50        0</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;     E    610    500   1001       40      120</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>(<span class="at">voters =</span> <span class="fu">weight_list_votes</span>(votes_matrix, district_seats))</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt;     A    160  560.4  292.5        0      150</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt;     B    780  162.8  285.0       20       60</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;     C    280  260.4  307.5       10       80</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt;     D      0    0.0    0.0       50        0</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;     E    122  100.0   71.5       40      120</span></span></code></pre></div>
+<p>This step is performed within <code>biproporz()</code> with the
+parameter <code>use_list_votes = TRUE</code>. The result is a matrix
+with fractional voter counts, as votes can be split between multiple
+parties.</p>
+</div>
+</div>
+<div id="standard-biproportional-apportionment" class="section level2">
+<h2>Standard Biproportional Apportionment</h2>
+<p>The default <code>biproporz()</code> method allocates seats based on
+the votes matrix and district seats using standard rounding for both the
+upper and lower apportionments.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>seats_biproporz_standard <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, district_seats)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># Number of seats per party</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">rowSums</span>(seats_biproporz_standard)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; A B C D E </span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 8 9 6 0 3</span></span></code></pre></div>
+<p>Key observations from the standard apportionment:</p>
+<ul>
+<li><em>Party D</em> did not receive enough votes across all districts
+to win a seat.</li>
+<li>In <em>City 3</em>, <em>Party B</em> receives the most seats despite
+having fewer total votes than two other parties.</li>
+<li><em>Party E</em>’s strongest district is <em>City 1</em> (122
+voters), but it does not win a seat there.</li>
+</ul>
+<p>The <code>biproporz()</code> function returns the seat allocation as
+a matrix with divisors as hidden attributes (see
+<code>get_divisors()</code>). You can print the marginal sums (total
+seats per party and district) and divisors with
+<code>summary()</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">summary</span>(seats_biproporz_standard)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt;            City 1 City 2 City 3 Region 4 Region 5 (sum) (divisor)</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt;          A      1      2      4        0        1     8      0.91</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;          B      3      1      5        0        0     9       0.8</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;          C      1      1      4        0        0     6         1</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt;          D      0      0      0        0        0     0         1</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;          E      0      1      1        1        0     3      0.76</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt;      (sum)      5      5     14        1        1    26          </span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;  (divisor)   1703   1286   1008      101      324</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co"># You can transpose the matrix</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># summary(t(seats_biproporz_standard))</span></span></code></pre></div>
+</div>
+<div id="modifying-biproporz-with-parameters" class="section level2">
+<h2>Modifying biproporz with Parameters</h2>
+<div id="applying-a-quorum" class="section level3">
+<h3>Applying a Quorum</h3>
+<p>A quorum can ensure that only parties with a minimum percentage or
+number of votes are eligible for seat allocation. In this example, we
+impose a 5% quorum on the total votes.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">biproporz</span>(votes_matrix, district_seats, <span class="fu">quorum_any</span>(<span class="at">total =</span> <span class="fl">0.05</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt;     A      1      2      4        0        1</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt;     B      3      1      5        0        0</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt;     C      1      1      4        0        0</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;     D      0      0      0        0        0</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt;     E      0      1      1        1        0</span></span></code></pre></div>
+<p>This does not actually change the seat distribution compared to the
+standard method, as <em>Party D</em> is already below the “natural
+quorum” and did not get enough votes for any seat.</p>
+</div>
+<div id="alternative-apportionment-methods" class="section level3">
+<h3>Alternative Apportionment Methods</h3>
+<p><code>biproporz()</code> allows you to specify different methods for
+the upper and lower apportionment by passing a list to the
+<code>method</code> parameter. For example, we can use the Adams method
+for the upper apportionment and standard rounding for the lower
+apportionment.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">biproporz</span>(votes_matrix, district_seats, <span class="at">method =</span> <span class="fu">list</span>(<span class="st">&quot;adams&quot;</span>, <span class="st">&quot;round&quot;</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;     A      1      2      5        0        0</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;     B      3      1      4        0        0</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;     C      1      1      4        0        0</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt;     D      0      0      0        1        0</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;     E      0      1      1        0        1</span></span></code></pre></div>
+</div>
+<div id="custom-rounding-function" class="section level3">
+<h3>Custom Rounding Function</h3>
+<p>To customize seat allocation, you can define your own rounding
+function for the lower apportionment. Here’s a custom rounding function
+that works as follows:</p>
+<ul>
+<li>Values below 0.7 are rounded down to 0</li>
+<li>Values equal to or greater than 0.7 are rounded up to 1</li>
+<li>Standard rounding applies for values greater than 1 (i.e. values
+below .5 are rounded down)</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>custom_rounding_func <span class="ot">=</span> <span class="cf">function</span>(x) {</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>    <span class="fu">stopifnot</span>(<span class="fu">all</span>(x <span class="sc">&gt;=</span> <span class="dv">0</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    lt0<span class="fl">.7</span> <span class="ot">=</span> x <span class="sc">&lt;</span> <span class="fl">0.7</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    x[lt0<span class="fl">.7</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>    x[<span class="sc">!</span>lt0<span class="fl">.7</span>] <span class="ot">&lt;-</span> <span class="fu">ceil_at</span>(x[<span class="sc">!</span>lt0<span class="fl">.7</span>], <span class="fl">0.5</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>    x</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>}</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co"># The function must work with a matrix</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="fu">custom_rounding_func</span>(<span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.6</span>, <span class="fl">1.5</span>, <span class="fl">2.5</span>), <span class="dv">2</span>))</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;      [,1] [,2]</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; [1,]    0    2</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; [2,]    0    3</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co"># Apply custom rounding function in lower apportionment</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="fu">biproporz</span>(votes_matrix, district_seats, </span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>          <span class="at">method =</span> <span class="fu">list</span>(<span class="st">&quot;adams&quot;</span>, custom_rounding_func))</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt;     A      0      3      5        0        0</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt;     B      3      1      4        0        0</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt;     C      1      1      4        0        0</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt;     D      0      0      0        1        0</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt;     E      1      0      1        0        1</span></span></code></pre></div>
+<p>Compared to using standard rounding, parties <em>A</em> and
+<em>E</em> swap one seat in cities <em>1</em> and <em>2</em>.</p>
+</div>
+</div>
+<div id="district-winner-methods" class="section level2">
+<h2>District Winner Methods</h2>
+<div id="winner-take-one-wto" class="section level3">
+<h3>Winner-Take-One (WTO)</h3>
+<p>The WTO method guarantees that the party with the most votes in each
+district will receive at least one seat, given that the party is
+eligible for a seat from the upper apportionment. These two constraints
+may lead to conflicts and an error, as seen below.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">biproporz</span>(votes_matrix, district_seats, <span class="at">method =</span> <span class="st">&quot;wto&quot;</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; Error : Not enough upper apportionment seats to give district winner seats to party: &#39;D&#39;</span></span></code></pre></div>
+<p><em>Party D</em> has the most votes in <em>Region 4</em> and should
+get a seat there but there’s no party seat to allocate. To prevent this
+case, a quorum is usually applied to ensure that only large enough
+parties are eligible for seats.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">biproporz</span>(votes_matrix, district_seats, <span class="at">method =</span> <span class="st">&quot;wto&quot;</span>,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>          <span class="at">quorum =</span> <span class="fu">quorum_any</span>(<span class="at">total =</span> <span class="fl">0.01</span>))</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt;     A      1      2      4        0        1</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt;     B      3      1      5        0        0</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt;     C      1      1      4        0        0</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt;     D      0      0      0        0        0</span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt;     E      0      1      1        1        0</span></span></code></pre></div>
+</div>
+<div id="wto-with-an-alternative-upper-apportionment-method" class="section level3">
+<h3>WTO with an Alternative Upper Apportionment Method</h3>
+<p>By switching to the Adams method for the upper apportionment,
+<em>Party D</em> gets one seat (as we’ve already seen). This resolves
+the conflict, allowing WTO to work in the lower apportionment.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">biproporz</span>(votes_matrix, district_seats, <span class="at">method =</span> <span class="fu">list</span>(<span class="st">&quot;adams&quot;</span>, <span class="st">&quot;wto&quot;</span>))</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt;     A      0      2      5        0        1</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt;     B      3      1      4        0        0</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt;     C      1      1      4        0        0</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="co">#&gt;     D      0      0      0        1        0</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co">#&gt;     E      1      1      1        0        0</span></span></code></pre></div>
+</div>
+<div id="wto-with-ties" class="section level3">
+<h3>WTO with Ties</h3>
+<p>If two parties have the same number of votes in a district (and
+there’s not enought seats for both), there is no clear district winner
+and the WTO condition is not applied in this district.
+<code>biproporz</code> issues a warning in this case, as seen in this
+example:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>(<span class="at">tied_votes =</span> <span class="fu">matrix</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>    <span class="fu">c</span>(<span class="dv">1000</span>, <span class="dv">500</span>, <span class="dv">150</span>, <span class="dv">150</span>), <span class="dv">2</span>, </span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>    <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="at">party =</span> <span class="fu">c</span>(<span class="st">&quot;X&quot;</span>, <span class="st">&quot;Y&quot;</span>), <span class="at">district =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)))</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt; party    1   2</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt;     X 1000 150</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co">#&gt;     Y  500 150</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>tied_votes_seats <span class="ot">=</span> <span class="fu">setNames</span>(<span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">1</span>), <span class="fu">colnames</span>(tied_votes))</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="fu">try</span>(<span class="fu">biproporz</span>(tied_votes, tied_votes_seats, <span class="at">method =</span> <span class="st">&quot;wto&quot;</span>))</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt; Warning: Not enough seats for tied parties with the most votes in: &#39;2&#39;</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt; Winner take one condition is not applied in this district.</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; party 1 2</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt;     X 1 1</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt;     Y 1 0</span></span></code></pre></div>
+<p>When WTO is suspended in district <em>2</em>, tied party <em>Y</em>
+gets a seat in district <em>1</em> as this distribution better satisfies
+the constraints given by the upper apportionment. To explicitly break
+the tie (which might be necessary depending on the actual
+specifications) you need to modify the votes matrix by adding a very
+small vote amount to the district winner. Here is a workflow to break
+ties randomly:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>tied_districts <span class="ot">=</span> <span class="fu">district_winner_matrix</span>(tied_votes, tied_votes_seats)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="cf">for</span>(d <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">ncol</span>(tied_votes))) {</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>    <span class="cf">if</span>(<span class="fu">anyNA</span>(tied_districts[,d])) {</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>        tied_parties <span class="ot">=</span> <span class="fu">which</span>(<span class="fu">is.na</span>(tied_districts[,d]))</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>        </span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>        <span class="co"># break tie randomly</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>        tiebreak_winner <span class="ot">=</span> <span class="fu">sample</span>(tied_parties, <span class="dv">1</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>        <span class="fu">cat</span>(<span class="st">&quot;party&quot;</span>, <span class="fu">names</span>(tiebreak_winner), <span class="st">&quot;wins district&quot;</span>, d)</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>        </span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>        <span class="co"># assuming the impact of a small vote difference on </span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>        <span class="co"># the overall result is negligible</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>        tied_votes[tiebreak_winner,d] <span class="ot">&lt;-</span> tied_votes[tiebreak_winner,d]<span class="sc">+</span><span class="fl">1e-9</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>    }</span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>}</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; party Y wins district 2</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="fu">biproporz</span>(tied_votes, tied_votes_seats, <span class="at">method =</span> <span class="st">&quot;wto&quot;</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; party 1 2</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt;     X 2 0</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt;     Y 0 1</span></span></code></pre></div>
+<p>As you can see, party <em>Y</em> now has a seat in district
+<em>2</em> as they won the tiebreaker. This means in turn that party
+<em>X</em> must get both seats in district <em>1</em>.</p>
+</div>
+<div id="guaranteeing-district-winners-a-seat" class="section level3">
+<h3>Guaranteeing District Winners a Seat</h3>
+<p>You can modify the WTO method to ensure district winners always get a
+seat, even if they don’t meet the upper apportionment criteria. Below is
+a custom function that implements this approach. This is a non-standard
+approach and the function should be adapted as needed.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>biproporz_absolute_wto <span class="ot">=</span> <span class="cf">function</span>(votes_matrix, district_seats,</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                                  <span class="at">quorum =</span> <span class="cn">NULL</span>, <span class="at">use_list_votes =</span> <span class="cn">TRUE</span>) {</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>    <span class="co"># 1) Identify unambiguous district winners</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>    <span class="co"># Note: This step could also happen after the quorum has been applied</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>    <span class="co"># (depending on the desired method implementation)</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>    district_winners <span class="ot">=</span> <span class="fu">district_winner_matrix</span>(votes_matrix, district_seats)</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>    district_winners[<span class="fu">is.na</span>(district_winners)] <span class="ot">&lt;-</span> <span class="cn">FALSE</span> <span class="co"># Ignore ties</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>    <span class="co"># 2) Apply quorum if specified</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>    <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.null</span>(quorum)) {</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>        votes_matrix <span class="ot">&lt;-</span> <span class="fu">apply_quorum</span>(votes_matrix, quorum)</span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>    }</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>    </span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>    <span class="co"># 3) Assign party seats in upper apportionment</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>    ua <span class="ot">=</span> <span class="fu">upper_apportionment</span>(votes_matrix, district_seats, </span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>                             use_list_votes, <span class="at">method =</span> <span class="st">&quot;round&quot;</span>)</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>    <span class="co"># 4.1) Assign seats to district winners without </span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>    <span class="co"># enough upper apportionment seats</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a>    seats_without_ua <span class="ot">=</span> district_winners <span class="sc">*</span> <span class="dv">1</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a>    seats_without_ua[<span class="fu">rowSums</span>(district_winners) <span class="sc">&lt;=</span> ua<span class="sc">$</span>party, ] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a>    </span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a>    <span class="co"># 4.2) Biproportional apportionment for remaining seats</span></span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a>    <span class="co"># Build votes matrix, set votes for district winners </span></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a>    <span class="co"># without enough upper apportionment seats to zero</span></span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a>    biprop_votes_matrix <span class="ot">=</span> votes_matrix</span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a>    biprop_votes_matrix[seats_without_ua <span class="sc">&gt;</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1"></a>    </span>
+<span id="cb13-29"><a href="#cb13-29" tabindex="-1"></a>    <span class="co"># Reduce the number of seats for districts that </span></span>
+<span id="cb13-30"><a href="#cb13-30" tabindex="-1"></a>    <span class="co"># already had a &quot;insufficient district winner&quot; seat assigned</span></span>
+<span id="cb13-31"><a href="#cb13-31" tabindex="-1"></a>    non_biprop_distr <span class="ot">=</span> <span class="fu">colSums</span>(seats_without_ua) <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb13-32"><a href="#cb13-32" tabindex="-1"></a>    biprop_district_seats <span class="ot">=</span> district_seats</span>
+<span id="cb13-33"><a href="#cb13-33" tabindex="-1"></a>    biprop_district_seats[non_biprop_distr] <span class="ot">&lt;-</span> </span>
+<span id="cb13-34"><a href="#cb13-34" tabindex="-1"></a>        biprop_district_seats[non_biprop_distr] <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb13-35"><a href="#cb13-35" tabindex="-1"></a>    </span>
+<span id="cb13-36"><a href="#cb13-36" tabindex="-1"></a>    <span class="co"># Run biproporz</span></span>
+<span id="cb13-37"><a href="#cb13-37" tabindex="-1"></a>    seats_biproporz <span class="ot">=</span> <span class="fu">biproporz</span>(biprop_votes_matrix, biprop_district_seats, </span>
+<span id="cb13-38"><a href="#cb13-38" tabindex="-1"></a>                                <span class="at">method =</span> <span class="st">&quot;wto&quot;</span>)</span>
+<span id="cb13-39"><a href="#cb13-39" tabindex="-1"></a>    </span>
+<span id="cb13-40"><a href="#cb13-40" tabindex="-1"></a>    <span class="co"># Remove divisor attributes, as they&#39;re no longer </span></span>
+<span id="cb13-41"><a href="#cb13-41" tabindex="-1"></a>    <span class="co"># meaningful for the combined distribution</span></span>
+<span id="cb13-42"><a href="#cb13-42" tabindex="-1"></a>    seats_biproporz <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(seats_biproporz)</span>
+<span id="cb13-43"><a href="#cb13-43" tabindex="-1"></a>    </span>
+<span id="cb13-44"><a href="#cb13-44" tabindex="-1"></a>    <span class="co"># 5) Return final seat distribution,</span></span>
+<span id="cb13-45"><a href="#cb13-45" tabindex="-1"></a>    <span class="co">#    combining the two apportionments </span></span>
+<span id="cb13-46"><a href="#cb13-46" tabindex="-1"></a>    <span class="fu">return</span>(seats_biproporz <span class="sc">+</span> seats_without_ua)</span>
+<span id="cb13-47"><a href="#cb13-47" tabindex="-1"></a>}</span></code></pre></div>
+<p>Let’s compare the standard biproportional apportionment to the
+modified method, which guarantees district winners a seat.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>seats_biproporz_absolute_wto <span class="ot">=</span> <span class="fu">biproporz_absolute_wto</span>(votes_matrix, district_seats)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co"># Show the difference to the standard apportionment</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>seats_biproporz_absolute_wto <span class="sc">-</span> seats_biproporz_standard</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt;     A     -1      0      1        0        0</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt;     B      0      0     -1        0        0</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt;     C      0      0      0        0        0</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt;     D      0      0      0        1        0</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt;     E      1      0      0       -1        0</span></span></code></pre></div>
+<p>In this example, <em>Party D</em> gains a seat from <em>Party B</em>.
+To satisfy the new constraints, there are changes in district seat
+distributions for <em>Party A</em> and <em>Party E</em>.</p>
+<p>Note that while this method resolves possible conflicts for district
+winners without upper apportionment seats, other conflicts might arise.
+For example, if too many district winners are missing upper
+apportionment seats, the constraints for allocating the remaining seats
+may become overly restrictive.</p>
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

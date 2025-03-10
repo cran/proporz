@@ -1,6 +1,16 @@
+# proporz 1.5.1
+
+* new "Modifying biproporz()" vignette (#15)
+* add `district_winner_matrix()` function, exported internal implementation (#13)
+* add `apply_quorum()` function, exported internal implementation
+* add `summary()` method for biproporz results which shows marginal sums and divisors
+* returned seat values from proporz/biproporz functions are always integer
+* undefined biproporz results are caught earlier, added flow criterion check (#14)
+* minor changes to error messages
+
 # proporz 1.5.0
 
-* add new feature: winner take one method for `biproporz()` and `pukelsheim` (#10)
+* add new feature: winner take one method for `biproporz()` and `pukelsheim()` (#10)
 * allow non-integer vote counts
 * round divisors to as few digits as possible
 * changed error message for undefined/tied results
@@ -46,4 +56,3 @@
 # proporz 1.0.0
 
 * Publish package to Github
-

@@ -2,20 +2,28 @@
 #'
 #' Show the district and party divisors used to assign seats.
 #' This method provides easier access to divisors stored in
-#' `attributes(...)$divisors`
+#' `attributes(...)$divisors`.
 #'
-#' @param biproporz_result a matrix created by [biproporz()]
-#'                         or a data.frame created by [pukelsheim()]
+#' @param biproporz_result a matrix created by [biproporz()] or a
+#'   data.frame created by [pukelsheim()]
 #'
-#' @returns The district and party divisors in a list, each as a vector
+#' @returns The district and party divisors (named "districts" and "parties") in a list, each
+#'   as a vector
 #'
 #' @examples
 #' seats_matrix = biproporz(uri2020$votes_matrix, uri2020$seats_vector)
 #' get_divisors(seats_matrix)
 #'
+#' seats_df = pukelsheim(pivot_to_df(uri2020$votes_matrix),
+#'                       data.frame(names(uri2020$seats_vector), uri2020$seats_vector))
+#' get_divisors(seats_df)
+#'
+#' # summary() also prints the divisors for a biproporz matrix
+#' summary(seats_matrix)
+#'
 #' @export
 get_divisors = function(biproporz_result) {
-    attributes(biproporz_result)$divisors
+    attributes(biproporz_result)[["divisors"]]
 }
 
 prettier_divisors = function(votes_matrix, divisors, round_func) {
@@ -23,8 +31,8 @@ prettier_divisors = function(votes_matrix, divisors, round_func) {
     dD <- divisors[["cols"]]
     dP <- divisors[["rows"]]
 
-    dP <- .round_matrix_divisors(dP, \(x) round_func(divide_votes_matrix(votes_matrix, dD, x)))
-    dD <- .round_matrix_divisors(dD, \(x) round_func(divide_votes_matrix(votes_matrix, x, dP)))
+    dP <- .round_matrix_divisors(dP, function(x) round_func(divide_votes_matrix(votes_matrix, dD, x)))
+    dD <- .round_matrix_divisors(dD, function(x) round_func(divide_votes_matrix(votes_matrix, x, dP)))
 
     return(list(cols = dD, rows = dP))
 }
@@ -34,7 +42,7 @@ prettier_divisors = function(votes_matrix, divisors, round_func) {
     expected = round_matrix_func(divisors)
 
     # start with divisors with the most digits
-    for(i in order(n_digits(divisors), decreasing = T)) {
+    for(i in order(n_digits(divisors), decreasing = TRUE)) {
         # see if rounded down or up to k digits leads to the same result
         for(k in seq(0,15)) {
             divisors_cand = divisors

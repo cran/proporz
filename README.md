@@ -1,4 +1,4 @@
-# proporz <img src="man/figures/logo.png" align="right" height="138" />
+# proporz <img src="man/figures/logo.png" align="right" height="138" alt = "proporz logo"/>
 
 Calculate seat apportionment for legislative bodies with various methods. These
 methods include divisor methods (e.g. D'Hondt, Webster or Adams), largest 
@@ -107,21 +107,22 @@ head(seats_df)
 #> 6       6      1701      15695     3
 ```
 
-The [**apportionment scenarios vignette**](https://polettif.github.io/proporz/articles/apportionment_scenarios.html) 
-contains more examples.
+The [**Apportionment scenarios vignette**](https://polettif.github.io/proporz/articles/apportionment_scenarios.html) 
+contains more examples. 
+How to adapt `biproporz` for special use cases is demonstrated in the [**Modifying biproporz() vignette**](https://polettif.github.io/proporz/articles/modifying_biproporz.html).
 
 ## Shiny app
 
 The package provides a basic Shiny app where you can calculate biproportional
 apportionment on an interactive dashboard. You need to have the packages `shiny` 
-and `shinyMatrix` installed.
+and `shinyMatrix` installed. [Try it out on shinyapps.io](https://polettif.shinyapps.io/proporz/)
 
 ```r
 # install.packages("shiny")
 # install.packages("shinyMatrix")
 proporz::run_app()
 ```
-<img src="man/figures/shinyapp-example.gif" style = "width:70%;">
+<img src="man/figures/shinyapp-example.gif" style = "width:70%;" alt = "shiny app gif">
 
 
 ## Function details
@@ -180,10 +181,10 @@ more focus on analysis. However, biproportional apportionment is missing from th
 pure R packages and RBazi needs rJava with an accompanying jar.
 
 - [RBazi](https://www.math.uni-augsburg.de/htdocs/emeriti/pukelsheim/bazi/RBazi.html): Package using rJava to access the functions of [BAZI](https://www.math.uni-augsburg.de/htdocs/emeriti/pukelsheim/bazi/welcome.html).
-- [seatdist](https://github.com/jmedzihorsky/seatdist) package for seat apportionment and disproportionality measurement.
-- [disprr](https://github.com/pierzgal/disprr) Examine Disproportionality of Apportionment Methods.
+- [seatdist](https://github.com/jmedzihorsky/seatdist): Package for seat apportionment and disproportionality measurement.
+- [disprr](https://github.com/pierzgal/disprr): Simulate election results and examine disproportionality of apportionment methods.
 - [apportR](https://github.com/jalapic/apportR): Package containing various apportionment methods, with particular relevance for the problem of apportioning seats in the House of Representatives.
-- [apportion](https://github.com/christopherkenny/apportion) Convert populations into integer number of seats for legislative bodies, focusing on the United States.
+- [apportion](https://github.com/christopherkenny/apportion): Convert populations into integer number of seats for legislative bodies, focusing on the United States.
 
 ### Contributing
 

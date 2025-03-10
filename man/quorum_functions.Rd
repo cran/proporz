@@ -17,7 +17,8 @@ otherwise as number of votes. Must be greater than 0. Uses
 \code{\link[=reached_quorum_any_district]{reached_quorum_any_district()}}.}
 
 \item{total}{Vote threshold a party must reach for all votes cast. Used as
-share of total votes if less than 1, otherwise as number of votes. Must be
+share of total votes if less than 1. Otherwise as number of votes. Note that
+votes are not weighted with \code{\link[=weight_list_votes]{weight_list_votes()}} across districts. Must be
 greater than 0. Uses \code{\link[=reached_quorum_total]{reached_quorum_total()}}.}
 }
 \value{
@@ -28,11 +29,11 @@ quorums.
 }
 \description{
 \code{quorum_any()} and \code{quorum_all()} are used for the \code{quorum} parameter in
-\code{\link[=biproporz]{biproporz()}} or \code{\link[=pukelsheim]{pukelsheim()}} and help describe how quorums should be
-applied previous to seat distributions.
+\code{\link[=biproporz]{biproporz()}}/\code{\link[=pukelsheim]{pukelsheim()}} and help describe how quorums should be
+applied prior to seat distributions.
 }
 \details{
-There's a difference in how the functions work. With \code{quroum_any},
+There's a difference in how the functions work. With \code{quorum_any},
 \emph{at least one} quorum must be reached. With \code{quorum_all} \emph{all}
 (i.e. both) quorums must be reached. If you only use one parameter,
 \code{quorum_any()} and \code{quorum_all()} are identical.
@@ -43,9 +44,11 @@ dimnames(votes_matrix) <- list(c("A", "B", "C", "D"), c("Z1", "Z2"))
 seats = c(Z1 = 50, Z2 = 20)
 
 # use as parameter in biproporz or pukelsheim (general use case)
-biproporz(votes_matrix, seats, quorum = quorum_any(any_district = 0.1, total = 100))
+biproporz(votes_matrix, seats,
+          quorum = quorum_any(any_district = 0.1, total = 100))
 
-biproporz(votes_matrix, seats, quorum = quorum_all(any_district = 0.1, total = 100))
+biproporz(votes_matrix, seats,
+          quorum = quorum_all(any_district = 0.1, total = 100))
 
 biproporz(votes_matrix, seats, quorum = quorum_any(any_district = 0.1))
 
@@ -56,4 +59,7 @@ biproporz(votes_matrix, seats, quorum = quorum_any(total = 0.5))
 # the quorum parameter also accepts vectors (e.g. calculated elsewhere)
 biproporz(votes_matrix, seats, quorum = c(FALSE, TRUE, TRUE, TRUE))
 
+}
+\seealso{
+\code{\link[=apply_quorum]{apply_quorum()}} for standalone quorum calculations
 }

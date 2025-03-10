@@ -14,16 +14,16 @@ biproporz(
 }
 \arguments{
 \item{votes_matrix}{Vote count matrix with votes by party in rows and votes by district
-in columns}
+in columns.}
 
 \item{district_seats}{Vector defining the number of seats per district. Must be the same
-length as \code{ncol(votes_matrix)}. Values are name-matched to \code{votes_matrix} if both are
-named. If the number of seats per district should be assigned according to the number
-of votes (not the general use case), a single number for the total number of seats can
-be used.}
+length as \code{ncol(votes_matrix)}. Values are name-matched to \code{votes_matrix} columns if both
+are named. If the number of seats per district should be calculated according to the number
+of votes (not the general use case), a single number for the total number of seats can be
+used.}
 
 \item{quorum}{Optional list of functions which take the votes_matrix and return a logical
-vector that denotes for each list/party whether they reached the quorum (i.e. are
+vector that denotes for each party/row whether they reached the quorum (i.e. are
 eligible for seats). The easiest way to do this is via \code{\link[=quorum_any]{quorum_any()}} or
 \code{\link[=quorum_all]{quorum_all()}}, see examples. Alternatively you can pass a precalculated logical
 vector. No quorum is applied if parameter is missing or \code{NULL}.}
@@ -31,7 +31,7 @@ vector. No quorum is applied if parameter is missing or \code{NULL}.}
 \item{use_list_votes}{By default (\code{TRUE}) it's assumed that each voter in a district has
 as many votes as there are seats in a district. Thus, votes are weighted according to
 the number of available district seats with \code{\link[=weight_list_votes]{weight_list_votes()}}. Set to \code{FALSE} if
-\code{votes_matrix} shows the number of voters (e.g. they can only cast one vote for one
+\code{votes_matrix} shows the number of voters (i.e. they can only cast one vote for one
 party).}
 
 \item{method}{Defines which method is used to assign seats. The following methods are
@@ -42,9 +42,9 @@ and lower apportionment which is the standard for biproportional apportionment a
 the only method guaranteed to terminate.}
 \item{\code{wto}: "winner take one" works like "round" with a condition that the party that
 got the most votes in a district must get \emph{at least} one seat ('Majorzbedingung')
-in said district. Seats in the upper apportionment are assigned with
-Sainte-Laguë/Webster. \code{votes_matrix} must have row and column names to use this
-method. See \code{\link[=lower_apportionment]{lower_apportionment()}} for more details.}
+in said district. This only applies if they got enough seats in the upper
+apportionment (which uses the Sainte-Laguë/Webster method). See
+\code{\link[=lower_apportionment]{lower_apportionment()}} for more details.}
 }
 It is also possible to use any divisor method name listed in \code{\link[=proporz]{proporz()}}. If you want to
 use a different method for the upper and lower apportionment, provide a list with two

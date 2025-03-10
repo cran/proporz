@@ -12,7 +12,7 @@
 #' @inheritParams proporz
 #' @param divisors sequence of divisors (length equal to the number of seats).
 #'                 If it is a single number (e.g. 0.5), a sequence is generated
-#'                 starting with it.
+#'                 starting with it, increasing by 1.
 #'
 #' @inherit proporz return
 #'
@@ -27,10 +27,10 @@ highest_averages_method = function(votes, n_seats, divisors) {
     check_seats_number(n_seats, deparse(substitute(n_seats)))
 
     if(length(votes) == 1) { return(n_seats) }
-    stopifnot(all(!is.na(votes)))
-    if(n_seats == 0) { return(rep(0, length(votes))) }
+    assert(all(!is.na(votes)))
+    if(n_seats == 0) { return(rep(0L, length(votes))) }
 
-    stopifnot(is.null(dim(divisors)))
+    assert(is.null(dim(divisors)))
     if(length(divisors) == 1) {
         divisors <- seq(from = divisors, by = 1, length.out = n_seats)
     } else if(length(divisors) != n_seats) {
@@ -39,7 +39,7 @@ highest_averages_method = function(votes, n_seats, divisors) {
     n_parties = length(votes)
 
     # method
-    mtrx_votes = matrix(rep(votes, each=n_seats), ncol = n_parties)
+    mtrx_votes = matrix(rep(votes, each = n_seats), ncol = n_parties)
     colnames(mtrx_votes) <- names(votes)
     mtrx_divisors = matrix(rep(divisors, ncol(mtrx_votes)), ncol = n_parties)
 
@@ -47,11 +47,11 @@ highest_averages_method = function(votes, n_seats, divisors) {
     check_edge_quotient(mtrx_quotient, n_seats)
 
     # assign seats
-    mtrx_seats = mtrx_quotient-mtrx_quotient # 0 filled matrix
-    mtrx_seats[order(mtrx_quotient, decreasing = TRUE)[1:n_seats]] <- 1
+    mtrx_seats = matrix(0L, nrow = nrow(mtrx_quotient), ncol = ncol(mtrx_quotient))
+    mtrx_seats[order(mtrx_quotient, decreasing = TRUE)[seq_len(n_seats)]] <- 1L
 
-    vec = colSums(mtrx_seats)
-    vec[is.nan(vec)] <- 0
+    vec = as.integer(colSums(mtrx_seats))
+    vec[is.nan(vec)] <- 0L
     names(vec) <- names(votes)
 
     return(vec)
@@ -60,16 +60,14 @@ highest_averages_method = function(votes, n_seats, divisors) {
 #' Divisor methods
 #'
 #' Functions to directly apply divisor apportionment methods instead
-#' of calling [proporz()] with a method parameter.
+#' of calling [proporz()] with a method parameter. All divisor functions call
+#' [highest_averages_method()] with a different sequence of divisors.
 #'
 #' Divisor methods are known under different names:
 #' `r .doc_proporz_methods(TRUE)`
 #'
-#' All divisor functions call [highest_averages_method()] with a different sequence of
-#' divisors.
-#'
 #' @inheritParams proporz
-#' @seealso [proporz()]
+#' @seealso [proporz()], [highest_averages_method()]
 #' @inherit proporz return
 #' @examples
 #' votes = c("Party A" = 690, "Party B" = 400,

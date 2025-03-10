@@ -1,7 +1,7 @@
 Package: proporz
 Type: Package
 Title: Proportional Apportionment
-Version: 1.5.0
+Version: 1.5.1
 Authors@R: c(
     person("Flavio", "Poletti", role = c("aut", "cre", "cph"), email = "flavio.poletti@hotmail.ch"))
 Description: Calculate seat apportionment for legislative bodies with 
@@ -13,15 +13,16 @@ Description: Calculate seat apportionment for legislative bodies with
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Depends: R (>= 3.6.0)
 Suggests: shiny, shinyMatrix, testthat, knitr, rmarkdown
-URL: https://github.com/polettif/proporz
+URL: https://polettif.github.io/proporz/,
+        https://github.com/polettif/proporz
 BugReports: https://github.com/polettif/proporz/issues
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2024-04-03 16:00:49 UTC; flaviopoletti
+Packaged: 2025-03-10 11:59:18 UTC; flaviopoletti
 Author: Flavio Poletti [aut, cre, cph]
 Maintainer: Flavio Poletti <flavio.poletti@hotmail.ch>
 Repository: CRAN
-Date/Publication: 2024-04-03 16:50:02 UTC
+Date/Publication: 2025-03-10 12:10:02 UTC

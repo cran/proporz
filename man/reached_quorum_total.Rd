@@ -2,7 +2,7 @@
 % Please edit documentation in R/quorum.R
 \name{reached_quorum_total}
 \alias{reached_quorum_total}
-\title{Check if lists/parties have reached the quorum for all votes}
+\title{Check if parties reached the quorum for all votes}
 \usage{
 reached_quorum_total(votes_matrix, quorum_total)
 }
@@ -10,15 +10,20 @@ reached_quorum_total(votes_matrix, quorum_total)
 \item{votes_matrix}{votes matrix}
 
 \item{quorum_total}{Vote threshold a party must reach for all votes cast.
-Used as quota of total votes if less than 1, otherwise
+Used as fraction of total votes if less than 1, otherwise
 as number of votes. Must be greater than 0.}
 }
 \value{
-boolean vector with length equal to the number of lists/parties
-(\code{votes_matrix} rows) whether they reached the quorum or not
+Logical vector with length equal to the number of lists/parties (\code{votes_matrix}
+rows) showing whether they reached the quorum or not.
 }
 \description{
-Base implementation, used by \code{\link[=quorum_any]{quorum_any()}} and \code{\link[=quorum_all]{quorum_all()}}.
+Base implementation, used by \code{\link[=quorum_functions]{quorum_functions}}.
+}
+\note{
+Votes are not weighted across districts. This is relevant if the quorum threshold is the
+minimal number of \emph{voters} (either as percentage or absolute value). In this case, use
+\code{\link[=weight_list_votes]{weight_list_votes()}} before calculating the quorum.
 }
 \examples{
 (vm = matrix(c(239, 10, 308, 398, 20, 925), nrow = 3))
