@@ -8,6 +8,13 @@ create_wto_round_function = function(votes_matrix, district_seats, seats_parties
         stop("votes_matrix must have column and row names to handle district winners",
              call. = FALSE)
     }
+    assert_no_duplicates(colnames(votes_matrix))
+    assert_no_duplicates(rownames(votes_matrix))
+    assert_no_duplicates(names(district_seats))
+    assert_no_duplicates(names(seats_parties))
+
+    stopifnot(identical(colnames(votes_matrix), names(district_seats)))
+    stopifnot(identical(rownames(votes_matrix), names(seats_parties)))
 
     DISTRICT_WINNERS = most_votes_in_district_matrix(votes_matrix)
 
@@ -27,7 +34,8 @@ create_wto_round_function = function(votes_matrix, district_seats, seats_parties
     # check if there are enough seats for each party to satisfy winner constraint
     not_enough_party_seats = which(rowSums(DISTRICT_WINNERS) > seats_parties)
     if(length(not_enough_party_seats) > 0) {
-        stop("Not enough upper apportionment seats to give district winner seats to party: ",
+        stop("Not enough upper apportionment seats to give district winner seats to ",
+             num_word("party: ", "parties: ", not_enough_party_seats),
              collapse_names(names(not_enough_party_seats)), call. = FALSE)
     }
 
@@ -66,7 +74,7 @@ create_wto_round_function = function(votes_matrix, district_seats, seats_parties
 #'   are named. If a single value is supplied (like `1` as default), it is used as the number of
 #'   seats for every district.
 #'
-#' @return logical matrix with the same dimensions and names as `votes_matrix`
+#' @returns logical matrix with the same dimensions and names as `votes_matrix`
 #'
 #' @details If two or more parties are tied and there are not enough seats for each tied party,
 #'   the matrix value is `NA`.
@@ -90,10 +98,10 @@ district_winner_matrix = function(votes_matrix,
         district_seats <- rep(district_seats, ncol(votes_matrix))
     }
     if(is.null(names(district_seats))) names(district_seats) <- colnames(votes_matrix)
-    .votes_matrix.name = deparse(substitute(votes_matrix))
-    .district_seats.name = deparse(substitute(district_seats))
-    votes_matrix <- prep_votes_matrix(votes_matrix, .votes_matrix.name)
-    district_seats <- prep_district_seats(district_seats, votes_matrix, .district_seats.name, .votes_matrix.name)
+    .vmn = deparse(substitute(votes_matrix))
+    .dsm = deparse(substitute(district_seats))
+    votes_matrix <- prep_votes_matrix(votes_matrix, .vmn)
+    district_seats <- prep_district_seats(district_seats, votes_matrix, .dsm, .vmn)
 
     most_votes = most_votes_in_district_matrix(votes_matrix)
     not_enough_district_seats = which(colSums(most_votes) > district_seats)

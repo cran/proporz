@@ -22,17 +22,17 @@ district_seats
 
 ## ----apply_proporz------------------------------------------------------------
 apply_proporz = function(votes_matrix, district_seats, method, quorum = 0) {
-    seats_matrix = votes_matrix
-    seats_matrix[] <- NA
-    
-    # calculate proportional apportionment for each district (matrix column)
-    for(district in names(district_seats)) {
-        seats_matrix[,district] <- proporz(votes_matrix[,district],
-                                           district_seats[district],
-                                           quorum = quorum,
-                                           method = method)
-    }
-    return(seats_matrix)
+  seats_matrix = votes_matrix
+  seats_matrix[] <- NA
+  
+  # calculate proportional apportionment for each district (matrix column)
+  for(district in names(district_seats)) {
+    seats_matrix[,district] <- proporz(votes_matrix[,district],
+                                       district_seats[district],
+                                       quorum = quorum,
+                                       method = method)
+  }
+  return(seats_matrix)
 }
 
 ## -----------------------------------------------------------------------------
@@ -42,17 +42,17 @@ bydistrict_v0[rowSums(bydistrict_v0) > 0,]
 
 ## -----------------------------------------------------------------------------
 bydistrict_v1 = apply_proporz(votes_matrix, district_seats,
-                                      method = "sainte-lague")
+                              method = "sainte-lague")
 
 bydistrict_v2 = apply_proporz(votes_matrix, district_seats,
-                                      method = "huntington-hill", 
-                                      quorum = 0.03)
+                              method = "huntington-hill", 
+                              quorum = 0.03)
 
 ## ----compare------------------------------------------------------------------
 df_bydistrict = data.frame(
-    D.Hondt = rowSums(bydistrict_v0),
-    Sainte.Lague = rowSums(bydistrict_v1),
-    Huntington.Hill = rowSums(bydistrict_v2)
+  D.Hondt = rowSums(bydistrict_v0),
+  Sainte.Lague = rowSums(bydistrict_v1),
+  Huntington.Hill = rowSums(bydistrict_v2)
 )
 
 # sort table by D'Hondt seats
@@ -65,8 +65,8 @@ knitr::kable(df_bydistrict[rowSums(df_bydistrict) > 0,])
 vote_shares = rowSums(votes_matrix)/sum(votes_matrix)
 
 shares = data.frame(
-    seats = rowSums(bydistrict_v0)/sum(district_seats),
-    votes = vote_shares 
+  seats = rowSums(bydistrict_v0)/sum(district_seats),
+  votes = vote_shares 
 )
 shares$difference <- shares$seats-shares$votes
 shares <- round(shares, 4)
@@ -80,7 +80,7 @@ shares
 ## ----biprop, results="hide"---------------------------------------------------
 seats_biproportional = biproporz(votes_matrix, 
                                  district_seats, 
-                                 use_list_votes = FALSE)
+                                 weight_votes = FALSE)
 
 # show only parties with seats
 seats_biproportional[rowSums(seats_biproportional) > 0,]
@@ -95,14 +95,16 @@ seat_shares = rowSums(seats_biproportional)/sum(seats_biproportional)
 range(vote_shares - seat_shares)
 
 ## ----compare_matrices---------------------------------------------------------
-seat_changes = seats_biproportional-bydistrict_v0
+seat_changes = seats_biproportional - bydistrict_v0
 
-knitr::kable(seat_changes[rowSums(abs(seat_changes)) > 0,colSums(abs(seat_changes))>0])
+.parties_w_changes = rowSums(abs(seat_changes)) > 0
+.districts_w_changes = colSums(abs(seat_changes)) > 0
+knitr::kable(seat_changes[.parties_w_changes, .districts_w_changes])
 
 ## ----biprop_seats-------------------------------------------------------------
 full_biproportional = biproporz(votes_matrix, 
                                 district_seats = sum(district_seats),
-                                use_list_votes = FALSE)
+                                weight_votes = FALSE)
 
 # party seat distribution has not changed
 rowSums(full_biproportional) - rowSums(seats_biproportional)
@@ -111,9 +113,11 @@ rowSums(full_biproportional) - rowSums(seats_biproportional)
 colSums(full_biproportional) - colSums(seats_biproportional)
 
 ## ----uri----------------------------------------------------------------------
-seats_old_system = apply_proporz(uri2020$votes_matrix, uri2020$seats_vector, "hagenbach-bischoff")
+seats_old_system = apply_proporz(uri2020$votes_matrix, 
+                                 uri2020$seats_vector, 
+                                 "hagenbach-bischoff")
 
 seats_new_system = biproporz(uri2020$votes_matrix, uri2020$seats_vector)
 
-seats_new_system-seats_old_system
+seats_new_system - seats_old_system
 

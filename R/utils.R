@@ -1,9 +1,18 @@
 # simpler and marginally faster version of stopifnot
 assert = function(check) {
-    if(!all(check)) {
+    if(length(check) == 0 || !isTRUE(all(check))) {
         .x = deparse(substitute(check))
         stop(.x, " is not TRUE", call. = FALSE)
     }
+    invisible(TRUE)
+}
+
+has_duplicates_or_NA = function(x) {
+    anyNA(x) || anyDuplicated(x) != 0
+}
+
+assert_no_duplicates = function(vec) {
+    stopifnot(anyDuplicated(vec) == 0L)
     invisible(TRUE)
 }
 

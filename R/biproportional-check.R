@@ -7,12 +7,12 @@ prep_votes_matrix = function(votes_matrix, votes_matrix.name) {
         stop("Votes in ", vmn, " must be numbers >= 0", call. = FALSE)
     }
     if(!is.null(rownames(votes_matrix)) &&
-       length(unique(rownames(votes_matrix))) != nrow(votes_matrix)) {
-        stop("rownames in ", vmn , " must be unique", call. = FALSE)
+       has_duplicates_or_NA(rownames(votes_matrix))) {
+        stop("rownames in ", vmn, " must be unique without NA's", call. = FALSE)
     }
     if(!is.null(colnames(votes_matrix)) &&
-       length(unique(colnames(votes_matrix))) != ncol(votes_matrix)) {
-        stop("colnames in ", vmn, " must be unique", call. = FALSE)
+       has_duplicates_or_NA(colnames(votes_matrix))) {
+        stop("colnames in ", vmn, " must be unique without NA's", call. = FALSE)
     }
 
     return(votes_matrix)
@@ -22,7 +22,7 @@ prep_method = function(method) {
     if(!is.vector(method)) {
         stop("Method must be a character or a list", call. = FALSE)
     }
-    if(!length(method) %in% c(1,2)) {
+    if(!length(method) %in% c(1L, 2L)) {
         stop("Only one or two methods allowed", call. = FALSE)
     }
     if(length(method) == 1) {
@@ -46,18 +46,25 @@ prep_district_seats = function(district_seats, votes_matrix,
         stop("`", .district_seats.name, "` must be a numeric vector, data.frame or a single number.",
              call. = FALSE)
     }
+
     if(length(district_seats) > 1) {
         if(is.data.frame(district_seats)) {
             district_seats <- setNames(district_seats[[2]], district_seats[[1]])
         }
         if(ncol(votes_matrix) != length(district_seats)) {
             stop("`", .votes_matrix.name,
-                 "` needs to have districts as columns and parties as rows.",
+                 "` must have districts as columns and parties as rows.",
                  call. = FALSE)
         }
+
+        if(!is.null(names(district_seats)) && has_duplicates_or_NA(names(district_seats))) {
+            stop("`", .district_seats.name, "` must have unique names without NA's", call. = FALSE)
+        }
+
+        # Either both are named (then check names) or one of them is NULL
         if(!identical(sort(colnames(votes_matrix)), sort(names(district_seats)))) {
             stop("`", .district_seats.name,
-                 "` needs to have the same names as the columns in `",
+                 "` must have the same names as the columns in `",
                  .votes_matrix.name, "`", call. = FALSE)
         }
         if(!is.null(colnames(votes_matrix))) { # seats vector is named/unnamed like matrix
@@ -80,10 +87,10 @@ prep_district_seats_df = function(district_seats_df) {
 }
 
 check_params.pukelsheim = function(votes_df, district_seats_df, new_seats_col,
-                                   use_list_votes, winner_take_one,
+                                   weight_votes, winner_take_one,
                                    .votes_df, .district_seats_df) {
     assert(is.character(new_seats_col) && length(new_seats_col) == 1)
-    assert(is.logical(use_list_votes) && !is.na(use_list_votes) && length(use_list_votes) == 1)
+    assert(is.logical(weight_votes) && !is.na(weight_votes) && length(weight_votes) == 1)
     assert(is.logical(winner_take_one) && !is.na(winner_take_one) && length(winner_take_one) == 1)
 
     if(!is.data.frame(votes_df) || ncol(votes_df) != 3) {
@@ -184,4 +191,16 @@ is_flow_criterion_pair = function(x, base) {
     assert(is.logical(base) && !is.matrix(x))
     x_districts_not_covered_by_base = setdiff(which(x), which(base))
     return(any(x) && length(x_districts_not_covered_by_base) == 0)
+}
+
+catch_deprecated_use_list_votes = function(weight_votes, ...) {
+    dots = list(...)
+    if("use_list_votes" %in% names(dots)) {
+        if(getOption("proporz_use_list_votes_info", TRUE)) {
+            message("The parameter `use_list_votes` has been renamed to `weight_votes`")
+            options("proporz_use_list_votes_info" = FALSE)
+        }
+        weight_votes <- dots[["use_list_votes"]]
+    }
+    return(weight_votes)
 }

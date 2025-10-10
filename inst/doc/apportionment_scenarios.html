@@ -50,8 +50,9 @@ overflow: visible;
 }
 </style>
 <style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -62,7 +63,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -636,17 +637,17 @@ calculates the seat distribution for each district and returns the
 number of seats per party and district as a matrix. The user can specify
 the apportionment method and a quorum threshold.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>apply_proporz <span class="ot">=</span> <span class="cf">function</span>(votes_matrix, district_seats, method, <span class="at">quorum =</span> <span class="dv">0</span>) {</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    seats_matrix <span class="ot">=</span> votes_matrix</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    seats_matrix[] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    </span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    <span class="co"># calculate proportional apportionment for each district (matrix column)</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="cf">for</span>(district <span class="cf">in</span> <span class="fu">names</span>(district_seats)) {</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>        seats_matrix[,district] <span class="ot">&lt;-</span> <span class="fu">proporz</span>(votes_matrix[,district],</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>                                           district_seats[district],</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>                                           <span class="at">quorum =</span> quorum,</span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>                                           <span class="at">method =</span> method)</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    }</span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>    <span class="fu">return</span>(seats_matrix)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  seats_matrix <span class="ot">=</span> votes_matrix</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  seats_matrix[] <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  </span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  <span class="co"># calculate proportional apportionment for each district (matrix column)</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>  <span class="cf">for</span>(district <span class="cf">in</span> <span class="fu">names</span>(district_seats)) {</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>    seats_matrix[,district] <span class="ot">&lt;-</span> <span class="fu">proporz</span>(votes_matrix[,district],</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>                                       district_seats[district],</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>                                       <span class="at">quorum =</span> quorum,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>                                       <span class="at">method =</span> method)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  }</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="fu">return</span>(seats_matrix)</span>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>}</span></code></pre></div>
 </div>
 <div id="actual-distribution-method-dhondt" class="section level3">
@@ -678,18 +679,18 @@ method favors small parties. Generally, Huntington-Hill is used with a
 quorum, otherwise all parties with more than zero votes get at least one
 seat. In this example, the quorum is 3% of votes in a district.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>bydistrict_v1 <span class="ot">=</span> <span class="fu">apply_proporz</span>(votes_matrix, district_seats,</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                                      <span class="at">method =</span> <span class="st">&quot;sainte-lague&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                              <span class="at">method =</span> <span class="st">&quot;sainte-lague&quot;</span>)</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>bydistrict_v2 <span class="ot">=</span> <span class="fu">apply_proporz</span>(votes_matrix, district_seats,</span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                                      <span class="at">method =</span> <span class="st">&quot;huntington-hill&quot;</span>, </span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                                      <span class="at">quorum =</span> <span class="fl">0.03</span>)</span></code></pre></div>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>                              <span class="at">method =</span> <span class="st">&quot;huntington-hill&quot;</span>, </span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>                              <span class="at">quorum =</span> <span class="fl">0.03</span>)</span></code></pre></div>
 <p>Let’s compare the seat distributions for these three methods. We get
 the number of party seats on the national level with
 <code>rowSums</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>df_bydistrict <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>    <span class="at">D.Hondt =</span> <span class="fu">rowSums</span>(bydistrict_v0),</span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>    <span class="at">Sainte.Lague =</span> <span class="fu">rowSums</span>(bydistrict_v1),</span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>    <span class="at">Huntington.Hill =</span> <span class="fu">rowSums</span>(bydistrict_v2)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="at">D.Hondt =</span> <span class="fu">rowSums</span>(bydistrict_v0),</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>  <span class="at">Sainte.Lague =</span> <span class="fu">rowSums</span>(bydistrict_v1),</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>  <span class="at">Huntington.Hill =</span> <span class="fu">rowSums</span>(bydistrict_v2)</span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># sort table by D&#39;Hondt seats</span></span>
@@ -793,8 +794,8 @@ actual distribution method.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>vote_shares <span class="ot">=</span> <span class="fu">rowSums</span>(votes_matrix)<span class="sc">/</span><span class="fu">sum</span>(votes_matrix)</span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>shares <span class="ot">=</span> <span class="fu">data.frame</span>(</span>
-<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    <span class="at">seats =</span> <span class="fu">rowSums</span>(bydistrict_v0)<span class="sc">/</span><span class="fu">sum</span>(district_seats),</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="at">votes =</span> vote_shares </span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">seats =</span> <span class="fu">rowSums</span>(bydistrict_v0)<span class="sc">/</span><span class="fu">sum</span>(district_seats),</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">votes =</span> vote_shares </span>
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>)</span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>shares<span class="sc">$</span>difference <span class="ot">&lt;-</span> shares<span class="sc">$</span>seats<span class="sc">-</span>shares<span class="sc">$</span>votes</span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>shares <span class="ot">&lt;-</span> <span class="fu">round</span>(shares, <span class="dv">4</span>)</span>
@@ -836,11 +837,11 @@ districts.</p>
 already. We need to consider that voters in Finland can only vote for
 <em>one</em> person in each district. They can’t distribute as many
 votes as there are seats in their district among candidates/parties.
-Thus we need to use <code>use_list_votes=FALSE</code> as a parameter in
+Thus we need to use <code>weight_votes = FALSE</code> as a parameter in
 <code>biproporz</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>seats_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, </span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                                 district_seats, </span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                                 <span class="at">use_list_votes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                                 <span class="at">weight_votes =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co"># show only parties with seats</span></span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>seats_biproportional[<span class="fu">rowSums</span>(seats_biproportional) <span class="sc">&gt;</span> <span class="dv">0</span>,]</span></code></pre></div>
@@ -1089,9 +1090,11 @@ the national vote share. Discussing the pros and cons of a regional
 representation compared to a priority on national vote shares is not
 within the scope of this vignette. The following chunk shows the seat
 changes.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>seat_changes <span class="ot">=</span> seats_biproportional<span class="sc">-</span>bydistrict_v0</span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>seat_changes <span class="ot">=</span> seats_biproportional <span class="sc">-</span> bydistrict_v0</span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(seat_changes[<span class="fu">rowSums</span>(<span class="fu">abs</span>(seat_changes)) <span class="sc">&gt;</span> <span class="dv">0</span>,<span class="fu">colSums</span>(<span class="fu">abs</span>(seat_changes))<span class="sc">&gt;</span><span class="dv">0</span>])</span></code></pre></div>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>.parties_w_changes <span class="ot">=</span> <span class="fu">rowSums</span>(<span class="fu">abs</span>(seat_changes)) <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>.districts_w_changes <span class="ot">=</span> <span class="fu">colSums</span>(<span class="fu">abs</span>(seat_changes)) <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(seat_changes[.parties_w_changes, .districts_w_changes])</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1319,7 +1322,7 @@ its vote share. To do this, we use the total number of seats for the
 <code>district_seats</code> parameter.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>full_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, </span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>                                <span class="at">district_seats =</span> <span class="fu">sum</span>(district_seats),</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                                <span class="at">use_list_votes =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                                <span class="at">weight_votes =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co"># party seat distribution has not changed</span></span>
 <span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="fu">rowSums</span>(full_biproportional) <span class="sc">-</span> <span class="fu">rowSums</span>(seats_biproportional)</span>
@@ -1351,16 +1354,18 @@ parliament was elected with biproportional apportionment for some
 municipalities. Previously, these four municipalities used the
 <em>Hagenbach-Bischoff</em> method. We’ll ignore all other
 municipalities which use a majoritarian electoral system.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>seats_old_system <span class="ot">=</span> <span class="fu">apply_proporz</span>(uri2020<span class="sc">$</span>votes_matrix, uri2020<span class="sc">$</span>seats_vector, <span class="st">&quot;hagenbach-bischoff&quot;</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>seats_new_system <span class="ot">=</span> <span class="fu">biproporz</span>(uri2020<span class="sc">$</span>votes_matrix, uri2020<span class="sc">$</span>seats_vector)</span>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>seats_old_system <span class="ot">=</span> <span class="fu">apply_proporz</span>(uri2020<span class="sc">$</span>votes_matrix, </span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                                 uri2020<span class="sc">$</span>seats_vector, </span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>                                 <span class="st">&quot;hagenbach-bischoff&quot;</span>)</span>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>seats_new_system<span class="sc">-</span>seats_old_system</span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt;      Altdorf Bürglen Erstfeld Schattdorf</span></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co">#&gt; CVP        1       0        0          0</span></span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt; SPGB      -1       0        0          0</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; FDP        0       0        0          0</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; SVP        0       0        0          0</span></span></code></pre></div>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>seats_new_system <span class="ot">=</span> <span class="fu">biproporz</span>(uri2020<span class="sc">$</span>votes_matrix, uri2020<span class="sc">$</span>seats_vector)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>seats_new_system <span class="sc">-</span> seats_old_system</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt;      Altdorf Bürglen Erstfeld Schattdorf</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; CVP        1       0        0          0</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; SPGB      -1       0        0          0</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; FDP        0       0        0          0</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; SVP        0       0        0          0</span></span></code></pre></div>
 <p>Compared to the previous election system there was a change of one
 seat (out of 37).</p>
 </div>

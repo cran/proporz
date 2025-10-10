@@ -10,13 +10,13 @@
 #'   are named. If the number of seats per district should be calculated according to the number
 #'   of votes (not the general use case), a single number for the total number of seats can be
 #'   used.
-#' @param use_list_votes By default (`TRUE`) it's assumed that each voter in a district has
+#' @param weight_votes By default (`TRUE`) it is assumed that each voter in a district has
 #'   as many votes as there are seats in a district. Thus, votes are weighted according to
-#'   the number of available district seats with [weight_list_votes()]. Set to `FALSE` if
-#'   `votes_matrix` shows the number of voters (i.e. they can only cast one vote for one
-#'   party).
+#'   the number of available district seats with [weight_votes_matrix()]. Set to `FALSE` if
+#'   the argument `votes_matrix` shows the number of _voters_ (e.g. because they can only cast
+#'   one vote for one party).
 #' @param method Apportion method that defines how seats are assigned, see [proporz()]. Default
-#'   is the Saintë-Lague/Webster method.
+#'   is the Sainte-Laguë/Webster method.
 #'
 #' @seealso [biproporz()], [lower_apportionment()]
 #'
@@ -37,14 +37,14 @@
 #'
 #' @export
 upper_apportionment = function(votes_matrix, district_seats,
-                               use_list_votes = TRUE,
+                               weight_votes = TRUE,
                                method = "round") {
     # check parameters
-    .votes_matrix.name = deparse(substitute(votes_matrix))
-    .district_seats.name = deparse(substitute(district_seats))
-    votes_matrix <- prep_votes_matrix(votes_matrix, .votes_matrix.name)
-    district_seats <- prep_district_seats(district_seats, votes_matrix, .district_seats.name, .votes_matrix.name)
-    assert(length(use_list_votes) == 1 && is.logical(use_list_votes))
+    .vmn = deparse(substitute(votes_matrix))
+    .dsn = deparse(substitute(district_seats))
+    votes_matrix <- prep_votes_matrix(votes_matrix, .vmn)
+    district_seats <- prep_district_seats(district_seats, votes_matrix, .dsn, .vmn)
+    assert(length(weight_votes) == 1 && is.logical(weight_votes))
 
     # district seats
     if(length(district_seats) == 1) {
@@ -55,8 +55,8 @@ upper_apportionment = function(votes_matrix, district_seats,
     }
 
     # party seats
-    if(use_list_votes) {
-        votes_matrix <- weight_list_votes(votes_matrix, seats_district)
+    if(weight_votes) {
+        votes_matrix <- weight_votes_matrix(votes_matrix, seats_district)
     }
     seats_party = proporz(rowSums(votes_matrix), sum(seats_district), method)
 
@@ -71,31 +71,34 @@ upper_apportionment = function(votes_matrix, district_seats,
 
 #' Create weighted votes matrix
 #'
-#' Weight list votes by dividing the votes matrix entries by the number
+#' Weight votes by dividing the votes matrix entries by the number
 #' of seats per district. This method is used in [upper_apportionment()] if
-#' `use_list_votes` is `TRUE` (default).
+#' `weight_votes` is `TRUE` (default).
 #'
 #' @param votes_matrix votes matrix
 #' @param district_seats seats per district, vector with same length
-#'   as `ncol(votes_matrix)`
+#'   as `ncol(votes_matrix)` and names as `colnames(votes_matrix)`
 #'
-#' @note The weighted votes are not rounded. Matrix and vector names are ignored.
+#' @note `weight_list_votes()` has been renamed to [weight_votes_matrix()]
+#' in `v1.5.2` and is deprecated.
 #'
-#' @returns the weighted `votes_matrix`
+#' @returns the weighted `votes_matrix` which contains the number of voters (not rounded)
 #'
 #' @examples
-#' weight_list_votes(uri2020$votes_matrix, uri2020$seats_vector)
+#' weight_votes_matrix(uri2020$votes_matrix, uri2020$seats_vector)
 #'
+#' @name weight_votes_matrix
+NULL
+
+#' @rdname weight_votes_matrix
 #' @export
-weight_list_votes = function(votes_matrix, district_seats) {
+weight_votes_matrix = function(votes_matrix, district_seats) {
     assert(all(district_seats >= 0))
-    assert(is.matrix(votes_matrix))
     if(ncol(votes_matrix) != length(district_seats)) {
         stop("`length(district_seats)` must be the same as `ncol(votes_matrix)`", call. = FALSE)
     }
-    if(!is.null(colnames(votes_matrix)) && !is.null(names(district_seats))) {
-        assert(colnames(votes_matrix) == names(district_seats))
-    }
+    votes_matrix <- prep_votes_matrix(votes_matrix, deparse(substitute(votes_matrix)))
+    district_seats <- prep_district_seats(district_seats, votes_matrix, "district_seats", "votes_matrix")
 
     M_seats_district = matrix(
         rep(district_seats, nrow(votes_matrix)),
@@ -106,4 +109,13 @@ weight_list_votes = function(votes_matrix, district_seats) {
     votes_matrix <- div0(votes_matrix, M_seats_district)
 
     return(votes_matrix)
+}
+
+#' @rdname weight_votes_matrix
+#' @export
+weight_list_votes = function(votes_matrix, district_seats) {
+    .Deprecated(
+        new = "weight_votes_matrix",
+        msg = "weight_list_votes has been renamed to weight_votes_matrix")
+    weight_votes_matrix(votes_matrix, district_seats)
 }

@@ -7,7 +7,7 @@ test_that("undefined result biproportional", {
     vm <- round(vm)
     vm[vm < 200] <- 0
 
-    expect_identical(upper_apportionment(vm, seats, use_list_votes = FALSE)$party,
+    expect_identical(upper_apportionment(vm, seats, weight_votes = FALSE)$party,
                      proporz(rowSums(vm), sum(seats), "round"))
 
     expect_error_fixed(upper_apportionment(vm, seats),
@@ -122,14 +122,16 @@ test_that("flow criterion check for almost empty matrix", {
                             party = c("A", "B", "C", "D"),
                             district = c("District 1", "District 2", "District 3", "District 4")))
     seats_blocks1 = c(`District 1` = 5L, `District 2` = 5L, `District 3` = 5L, `District 4` = 6L)
-    expect_error_fixed(biproporz(vm_blocks1, seats_blocks1),
-                       "Not enough seats for parties 'A', 'B' in districts 'District 1', 'District 2'\n(11 seats necessary, 10 available")
+    expect_error_fixed(
+        biproporz(vm_blocks1, seats_blocks1),
+        "Not enough seats for parties 'A', 'B' in districts 'District 1', 'District 2'\n(11 seats necessary, 10 available")
 
     vm_blocks2 = vm_blocks1[c(4,3,1,2),c(1,3,2,4)]
     dimnames(vm_blocks2) <- list(LETTERS[1:4], as.character(1:4))
     seats_blocks2 = setNames(seats_blocks1[c(1,3,2,4)], colnames(vm_blocks2))
-    expect_error_fixed(biproporz(vm_blocks2, seats_blocks2),
-                       "Not enough seats for parties 'C', 'D' in districts '1', '3'\n(11 seats necessary, 10 available)")
+    expect_error_fixed(
+        biproporz(vm_blocks2, seats_blocks2),
+        "Not enough seats for parties 'C', 'D' in districts '1', '3'\n(11 seats necessary, 10 available)")
 
     vm_blocks3 = uri2020$votes_matrix
     vm_blocks3[1,c(1,2,4)] <- vm_blocks3[4,c(1,2,4)] <- 0
@@ -205,7 +207,7 @@ test_that("error messages", {
     # biproportional
     expect_error_fixed(biproporz(vm, NA), "`NA` must be a numeric vector, data.frame or a single number")
     expect_error_fixed(biproporz(vdf, c(1,2,3)), "`vdf` must be a matrix")
-    expect_error_fixed(biproporz(vm, c(1,2,3)), "`vm` needs to have districts as columns and parties as rows")
+    expect_error_fixed(biproporz(vm, c(1,2,3)), "`vm` must have districts as columns and parties as rows")
     expect_error_fixed(biproporz(vm, seats, method = "largest_remainder_method"),
                        'Cannot use "largest_remainder_method", only divisor methods are possible in biproportional apportionment')
     expect_s3_class(biproporz(vm+0.1, seats), "proporz_matrix")
@@ -216,21 +218,13 @@ test_that("error messages", {
                        "Only one or two methods allowed")
     expect_error_fixed(biproporz(vm, seats, method = round),
                        "Method must be a character or a list")
-    expect_error_fixed(biproporz(vm, vm), "`vm` must be a numeric vector, data.frame or a single number")
+    expect_error_fixed(biproporz(vm, vm),
+                       "`vm` must be a numeric vector, data.frame or a single number")
 
     # upper/lower_apportionment
     ua = upper_apportionment(vm+0.1, seats)
     expect_true(is.matrix(lower_apportionment(vm+0.1, ua$district, ua$party)))
     expect_error_fixed(lower_apportionment(vm+0.1, seats, 1:3), "sum(seats_cols) == sum(seats_rows")
-
-    # votes_matrix
-    vm_names = matrix(1, 3, 2)
-    rownames(vm_names) <- c("A", "A", "B")
-    expect_error_fixed(prep_votes_matrix(vm_names, "x"), "rownames in `x` must be unique")
-    colnames(vm_names) <- c("I", "I")
-    expect_error_fixed(prep_votes_matrix(vm_names, "x"), "rownames in `x` must be unique")
-    rownames(vm_names) <- c("A", "C", "B")
-    expect_error_fixed(prep_votes_matrix(vm_names, "x"), "colnames in `x` must be unique")
 
     # max iterations
     options(proporz_max_iterations = 2)
@@ -241,4 +235,24 @@ test_that("error messages", {
     expect_error(
         lower_apportionment(matrix(c(21,11,33,21), 2), c(2,2), c(2,2), method = function(x) x),
         "Rounding function does not return integers")
+})
+
+test_that("unique name checks", {
+    # votes_matrix
+    vm_names = matrix(1, 3, 2)
+    rownames(vm_names) <- c("A", "A", "B")
+    expect_error_fixed(prep_votes_matrix(vm_names, "x"), "rownames in `x` must be unique without NA's")
+    colnames(vm_names) <- c("I", "I")
+    expect_error_fixed(prep_votes_matrix(vm_names, "x"), "rownames in `x` must be unique without NA's")
+    rownames(vm_names) <- c("A", "C", "B")
+    expect_error_fixed(prep_votes_matrix(vm_names, "x"), "colnames in `x` must be unique without NA's")
+
+    # district seats
+    ds_dupl = c("I" = 5, "I" = 5)
+    expect_error_fixed(prep_district_seats(ds_dupl, vm_names, "distrdupl", "xy"),
+                       "`distrdupl` must have unique names without NA's")
+    names(ds_dupl)[2] <- NA
+    colnames(vm_names)[2] <- NA
+    expect_error_fixed(prep_district_seats(ds_dupl, vm_names, "distrdupl", "xy"),
+                       "`distrdupl` must have unique names without NA's")
 })
