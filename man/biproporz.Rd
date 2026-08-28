@@ -17,22 +17,26 @@ biproporz(
 \item{votes_matrix}{Vote count matrix with votes by party in rows and votes by district
 in columns.}
 
-\item{district_seats}{Vector defining the number of seats per district. Must be the same
+\item{district_seats}{\itemize{
+\item Vector defining the number of seats per district. Must be the same
 length as \code{ncol(votes_matrix)}. Values are name-matched to \code{votes_matrix} columns if both
-are named. If the number of seats per district should be calculated according to the number
-of votes (not the general use case), a single number for the total number of seats can be
-used.}
+are named.
+\item If the number of seats per district should be calculated according to the number
+of votes, a single number for the total number of seats can be used. \code{weight_votes} will be
+ignored, as \code{votes_matrix} shows the number of voters.
+Note that apportioning district seats according to votes is not the general use case.
+}}
 
-\item{quorum}{Optional list of functions which take the votes_matrix and return a logical
-vector that denotes for each party/row whether they reached the quorum (i.e. are
-eligible for seats). The easiest way to do this is via \code{\link[=quorum_any]{quorum_any()}} or
+\item{quorum}{Optional list of functions which take the votes matrix and return a logical
+vector that shows for each party/row whether they reached the quorum (i.e. are
+eligible for seats). The easiest way to do this is by passing \code{\link[=quorum_any]{quorum_any()}} or
 \code{\link[=quorum_all]{quorum_all()}}, see examples. Alternatively you can pass a precalculated logical
 vector. No quorum is applied if this parameter is missing or \code{NULL}.}
 
 \item{weight_votes}{By default (\code{TRUE}) it is assumed that each voter in a district has
 as many votes as there are seats in a district. Thus, votes are weighted according to
 the number of available district seats with \code{\link[=weight_votes_matrix]{weight_votes_matrix()}}. Set to \code{FALSE} if
-the argument \code{votes_matrix} shows the number of \emph{voters} (e.g. because they can only cast
+\code{votes_matrix} shows the number of \emph{voters} (e.g. because they can only cast
 one vote for one party).}
 
 \item{method}{Defines which method is used to assign seats. The following methods are
@@ -49,14 +53,14 @@ apportionment (which uses the Sainte-Laguë/Webster method). See
 }
 It is also possible to use any divisor method name listed in \code{\link[=proporz]{proporz()}}. If you want to
 use a different method for the upper and lower apportionment, provide a list with two
-entries.}
+method names.}
 
-\item{...}{ignored (available for backwards compatibility)}
+\item{...}{Ignored (used for backwards compatibility)}
 }
 \value{
-Matrix with the same dimension as \code{votes_matrix} containing the number of seats
-with the row and column divisors stored in attributes (hidden from print, see
-\code{\link[=get_divisors]{get_divisors()}}).
+Matrix with the same dimension as \code{votes_matrix} containing the number of seats.
+Row/party and column/district divisors are stored in attributes (hidden from print(),
+use \code{\link[=get_divisors]{get_divisors()}} or \code{\link[=summary]{summary()}}).
 }
 \description{
 Method to proportionally allocate seats among parties (or lists) and districts (or
@@ -86,7 +90,10 @@ with the default Sainte-Laguë/Webster method.
 votes_matrix = uri2020$votes_matrix
 district_seats = uri2020$seats_vector
 
-biproporz(votes_matrix, district_seats)
+(bp <- biproporz(votes_matrix, district_seats))
+
+# print divisors and seat sums with summary()
+summary(bp)
 
 # apply quorum (high values for illustrative purposes)
 biproporz(votes_matrix, district_seats,

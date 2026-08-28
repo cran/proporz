@@ -400,7 +400,7 @@ per party and district by weighting the votes matrix with
 <span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt;     C    280  260.4  307.5       10       80</span></span>
 <span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt;     D      0    0.0    0.0       50        0</span></span>
 <span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt;     E    122  100.0   71.5       40      120</span></span></code></pre></div>
-<p>This step is performed within <code>biproporz()</code> with the
+<p>This step is performed within <code>biproporz</code> with the
 parameter <code>weight_votes = TRUE</code>. The result is a matrix with
 fractional voter counts, as votes can be split between multiple
 parties.</p>
@@ -408,7 +408,7 @@ parties.</p>
 </div>
 <div id="standard-biproportional-apportionment" class="section level2">
 <h2>2) Standard Biproportional Apportionment</h2>
-<p>The default <code>biproporz()</code> method allocates seats based on
+<p>The default <code>biproporz</code> method allocates seats based on
 the votes matrix and district seats using standard rounding for both the
 upper and lower apportionments.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>seats_biproporz_standard <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, district_seats)</span>
@@ -417,20 +417,10 @@ upper and lower apportionments.</p>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="fu">rowSums</span>(seats_biproporz_standard)</span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt; A B C D E </span></span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; 8 9 6 0 3</span></span></code></pre></div>
-<p>Key observations from the standard apportionment:</p>
-<ul>
-<li><em>Party D</em> did not receive enough votes across all districts
-to win a seat.</li>
-<li>In <em>City 3</em>, <em>Party B</em> receives the most seats despite
-having fewer total votes than two other parties.</li>
-<li><em>Party E</em>’s strongest district is <em>City 1</em> (122
-voters), but it does not win a seat there.</li>
-</ul>
-<p>The <code>biproporz()</code> function returns the seat allocation as
-a matrix with divisors as hidden attributes (see
-<code>get_divisors()</code>). You can print the marginal sums (total
-seats per party and district) and divisors with
-<code>summary()</code>.</p>
+<p><code>biproporz</code> returns the seat allocation as a matrix with
+divisors as hidden attributes (see <code>get_divisors()</code>). You can
+print the marginal sums (total seats per party and district) and
+divisors with <code>summary</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">summary</span>(seats_biproporz_standard)</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt;            City 1 City 2 City 3 Region 4 Region 5 (sum) (divisor)</span></span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt;          A      1      2      4        0        1     8      0.91</span></span>
@@ -443,6 +433,15 @@ seats per party and district) and divisors with
 <span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a></span>
 <span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co"># You can transpose the matrix</span></span>
 <span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># summary(t(seats_biproporz_standard))</span></span></code></pre></div>
+<p>Key observations from the standard apportionment:</p>
+<ul>
+<li><em>Party D</em> did not receive enough votes across all districts
+to win a seat.</li>
+<li>In <em>City 3</em>, <em>Party B</em> receives the most seats despite
+having fewer total votes than two other parties.</li>
+<li><em>Party E</em>’s strongest district is <em>City 1</em> (122
+voters), but it does not win a seat there.</li>
+</ul>
 </div>
 <div id="modifying-biproporz-with-parameters" class="section level2">
 <h2>3) Modifying biproporz with Parameters</h2>
@@ -465,7 +464,7 @@ quorum” and did not get enough votes for any seat.</p>
 </div>
 <div id="alternative-apportionment-methods" class="section level3">
 <h3>Alternative Apportionment Methods</h3>
-<p><code>biproporz()</code> allows you to specify different methods for
+<p><code>biproporz</code> allows you to specify different methods for
 the upper and lower apportionment by passing a list to the
 <code>method</code> parameter. For example, we can use the Adams method
 for the upper apportionment and standard rounding for the lower
@@ -582,32 +581,33 @@ example:</p>
 <p>When WTO is suspended in district <em>2</em>, tied party <em>Y</em>
 gets a seat in district <em>1</em> as this distribution better satisfies
 the constraints given by the upper apportionment. To explicitly break
-the tie (which might be necessary depending on the actual
+the tie (which might be necessary depending on the actual election
 specifications) you need to modify the votes matrix by adding a very
 small vote amount to the district winner. Here is a workflow to break
 ties randomly:</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>tied_districts <span class="ot">=</span> <span class="fu">district_winner_matrix</span>(tied_votes, tied_votes_seats)</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="cf">for</span>(d <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">ncol</span>(tied_votes))) {</span>
-<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">anyNA</span>(tied_districts[,d])) {</span>
-<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>    tied_parties <span class="ot">=</span> <span class="fu">which</span>(<span class="fu">is.na</span>(tied_districts[,d]))</span>
-<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>    </span>
-<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>    <span class="co"># break tie randomly</span></span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>    tiebreak_winner <span class="ot">=</span> <span class="fu">sample</span>(tied_parties, <span class="dv">1</span>)</span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;party&quot;</span>, <span class="fu">names</span>(tiebreak_winner), <span class="st">&quot;wins district&quot;</span>, d)</span>
-<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>    </span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>    <span class="co"># assuming the impact of a small vote difference on </span></span>
-<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>    <span class="co"># the overall result is negligible</span></span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>    tied_votes[tiebreak_winner,d] <span class="ot">&lt;-</span> tied_votes[tiebreak_winner,d]<span class="sc">+</span><span class="fl">1e-9</span></span>
-<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>  }</span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>}</span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; party Y wins district 2</span></span>
-<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a></span>
-<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="fu">biproporz</span>(tied_votes, tied_votes_seats, <span class="at">method =</span> <span class="st">&quot;wto&quot;</span>)</span>
-<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
-<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; party 1 2</span></span>
-<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt;     X 2 0</span></span>
-<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt;     Y 0 1</span></span></code></pre></div>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="cf">for</span>(d <span class="cf">in</span> <span class="fu">seq_len</span>(<span class="fu">ncol</span>(tied_votes))) {</span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>  <span class="cf">if</span>(<span class="fu">anyNA</span>(tied_districts[,d])) {</span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>    tied_parties <span class="ot">=</span> <span class="fu">which</span>(<span class="fu">is.na</span>(tied_districts[,d]))</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>    </span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>    <span class="co"># break tie randomly</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a>    tiebreak_winner <span class="ot">=</span> <span class="fu">sample</span>(tied_parties, <span class="dv">1</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>    <span class="fu">cat</span>(<span class="st">&quot;party&quot;</span>, <span class="fu">names</span>(tiebreak_winner), <span class="st">&quot;wins district&quot;</span>, d)</span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a>    </span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>    <span class="co"># assuming the impact of a small vote difference on </span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a>    <span class="co"># the overall result is negligible</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a>    tied_votes[tiebreak_winner,d] <span class="ot">&lt;-</span> tied_votes[tiebreak_winner,d]<span class="sc">+</span><span class="fl">1e-9</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a>  }</span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a>}</span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; party Y wins district 2</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="fu">biproporz</span>(tied_votes, tied_votes_seats, <span class="at">method =</span> <span class="st">&quot;wto&quot;</span>)</span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt; party 1 2</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt;     X 2 0</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt;     Y 0 1</span></span></code></pre></div>
 <p>As you can see, party <em>Y</em> now has a seat in district
 <em>2</em> as they won the tiebreaker. This means in turn that party
 <em>X</em> must get both seats in district <em>1</em>.</p>
@@ -669,14 +669,15 @@ modified method, which guarantees district winners a seat.</p>
 <span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>                                                      district_seats)</span>
 <span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a></span>
 <span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># Show the difference to the standard apportionment</span></span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>seats_biproporz_absolute_wto <span class="sc">-</span> seats_biproporz_standard</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">addmargins</span>(seats_biproporz_absolute_wto <span class="sc">-</span> seats_biproporz_standard)</span>
 <span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt;      district</span></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5</span></span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt;     A     -1      0      1        0        0</span></span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt;     B      0      0     -1        0        0</span></span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt;     C      0      0      0        0        0</span></span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt;     D      0      0      0        1        0</span></span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt;     E      1      0      0       -1        0</span></span></code></pre></div>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; party City 1 City 2 City 3 Region 4 Region 5 Sum</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt;   A       -1      0      1        0        0   0</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt;   B        0      0     -1        0        0  -1</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt;   C        0      0      0        0        0   0</span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt;   D        0      0      0        1        0   1</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt;   E        1      0      0       -1        0   0</span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co">#&gt;   Sum      0      0      0        0        0   0</span></span></code></pre></div>
 <p>In this example, <em>Party D</em> gains a seat from <em>Party B</em>.
 To satisfy the new constraints, there are changes in district seat
 distributions for <em>Party A</em> and <em>Party E</em>.</p>

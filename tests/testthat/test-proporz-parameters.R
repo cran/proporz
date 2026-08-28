@@ -1,14 +1,14 @@
-.sample_votes = function(n_non_zero, n_zero) {
-    repeat {
-        x = round(stats::runif(n_non_zero, 10, 1000))
-        if(length(unique(x)) == n_non_zero) {
-            break
-        }
-    }
-    return(c(x, rep(0, n_zero)))
-}
-
 test_that("proporz parameter range", {
+    .sample_votes = function(n_non_zero, n_zero) {
+        repeat {
+            x = round(stats::runif(n_non_zero, 10, 1000))
+            if(length(unique(x)) == n_non_zero) {
+                break
+            }
+        }
+        return(c(x, rep(0, n_zero)))
+    }
+
     method_list = unique(unlist(proporz_methods, use.names = FALSE))
 
     set.seed(0)
@@ -22,20 +22,18 @@ test_that("proporz parameter range", {
                        method_impl %in% c("divisor_ceiling", "divisor_geometric", "divisor_harmonic") &&
                        n_seats > 0) {
                         .method_impl = gsub("divisor_", "", method_impl, fixed = TRUE)
-                        expect_error(
+                        expect_error_fixed(
                             proporz(votes, n_seats, method_impl),
-                            paste0("With ",  .method_impl, " rounding there must be at ",
-                                   "least as many seats as there are parties with non-zero votes"),
-                            fixed = TRUE)
+                            paste0("With ", .method_impl, " rounding there must be at ",
+                                   "least as many seats as there are parties with non-zero votes"))
                     } else {
                         seats = proporz(votes, n_seats, method_impl)
                         assert(is.integer(seats))
-                        expect_true(is.integer(seats))
-                        expect_identical(length(seats), length(votes))
-                        expect_identical(sum(seats), n_seats)
+                        assert(identical(length(seats), length(votes)))
+                        assert(identical(sum(seats), n_seats))
 
                         if(n_seats > 0) {
-                            .quorum = sort(c(votes,0), decreasing = TRUE)[2]+0.5
+                            .quorum = sort(c(votes, 0), decreasing = TRUE)[2] + 0.5
                             seats_Q = proporz(votes, n_seats, method_impl, quorum = .quorum)
                             expect_identical(sum(seats_Q > 0), 1L)
                         }
@@ -48,12 +46,12 @@ test_that("proporz parameter range", {
     # unsupported values
     for(method_impl in method_list) {
         for(n_seats in list(NA, NULL, -1, 1.1, c(1, 1))) {
-            expect_error(proporz(c(100, 10, 5), n_seats, method_impl), "`n_seats` must be an integer >= 0")
+            expect_error_fixed(proporz(c(100, 10, 5), n_seats, method_impl), "`n_seats` must be an integer >= 0")
         }
     }
     for(method_impl in method_list) {
         for(votes in list(NA, NULL, -1)) {
-            expect_error(proporz(votes, 3, method_impl), "`votes` must be a numeric vector >= 0", fixed = TRUE)
+            expect_error_fixed(proporz(votes, 3, method_impl), "`votes` must be a numeric vector >= 0")
         }
     }
 })

@@ -1,12 +1,8 @@
 test_that("Uri 2020", {
-    biproporz_uri = function(votes_matrix, seats, ...) {
-        biproporz(votes_matrix, seats)
-    }
-
     uri20_result = structure(
         c(5L, 4L, 3L, 3L, 2L, 1L, 1L,3L,
           2L, 2L, 1L, 1L, 3L, 2L, 2L, 2L),
-        .Dim = c(4L, 4L), .Dimnames = list(
+        dim = c(4L, 4L), dimnames = list(
             c("CVP", "SPGB", "FDP", "SVP"),
             c("Altdorf", "B\u00fcrglen", "Erstfeld", "Schattdorf")))
 

@@ -81,6 +81,7 @@ try(biproporz(tied_votes, tied_votes_seats, method = "wto"))
 
 ## ----wto_tiebreak-------------------------------------------------------------
 tied_districts = district_winner_matrix(tied_votes, tied_votes_seats)
+
 set.seed(4)
 for(d in seq_len(ncol(tied_votes))) {
   if(anyNA(tied_districts[,d])) {
@@ -150,5 +151,5 @@ seats_biproporz_absolute_wto = biproporz_absolute_wto(votes_matrix,
                                                       district_seats)
 
 # Show the difference to the standard apportionment
-seats_biproporz_absolute_wto - seats_biproporz_standard
+addmargins(seats_biproporz_absolute_wto - seats_biproporz_standard)
 

@@ -1,5 +1,3 @@
-expect_error_fixed = function(...) testthat::expect_error(..., fixed = TRUE)
-
 # basic apportionment steps ####
 
 # https://en.wikipedia.org/wiki/biproporz_apportionment
@@ -38,6 +36,15 @@ test_that("lower apportionment", {
     vm0.5 = matrix(c(10, 10, 20, 10), 2, 2)
     sm0.5 = lower_apportionment(vm0.5, c(1, 1), c(1,1))
     expect_identical(sum(sm0.5), 2L)
+
+    # named vectors
+    d1n = setNames(d1, c("A", "B", "C"))[c(1,3,2)]
+    p1n = setNames(p1, c("I", "II", "III"))[c(3,2,1)]
+    M1n = M1
+    colnames(M1n) <- c("A", "B", "C")
+    rownames(M1n) <- c("I", "II", "III")
+    x1n = lower_apportionment(M1n, d1n, p1n)
+    expect_identical(c(x1n), c(x1))
 })
 
 test_that("biproporz", {
@@ -51,9 +58,8 @@ test_that("biproporz", {
 test_that("weight_votes_matrix", {
     vm = matrix(c(110,50,20,10), 2)
     vmw = weight_votes_matrix(vm, c(10, 2))
-    expect_error(weight_votes_matrix(vm, 1),
-                 "`length(district_seats)` must be the same as `ncol(votes_matrix)`",
-                 fixed = TRUE)
+    expect_error_fixed(weight_votes_matrix(vm, 1),
+                 "`length(district_seats)` must be the same as `ncol(votes_matrix)`")
     expect_equal(vmw, matrix(c(110/10,50/10,20/2,10/2), 2), tolerance = 1e-14)
     colnames(vm) <- c("A", "B")
     ds = setNames(c(1,1), c("B", "X"))
@@ -64,6 +70,10 @@ test_that("weight_votes_matrix", {
     expect_no_error(weight_votes_matrix(vm, ds[2:1]))
     expect_error_fixed(weight_votes_matrix(vm, unname(ds)),
                        "`district_seats` must have the same names as the columns in `votes_matrix`")
+
+    ds1 = c(3, 5)
+    ds2 = setNames(ds1, c("B", "A"))
+    expect_equal(weight_votes_matrix(unname(vm), ds1[2:1]), unname(weight_votes_matrix(vm, ds2)))
 })
 
 # expanded usage ####
@@ -98,7 +108,7 @@ test_that("pukelsheim wrapper", {
 })
 
 test_that("free apportionment for districts", {
-    # https://en.wikipedia.org/wiki/biproporz_apportionment#Specific_example
+    # https://en.wikipedia.org/wiki/Biproportional_apportionment#Specific_example
     input_matrix = matrix(c(123,912,312,45,714,255,815,414,215), nrow = 3)
     mtrx_exp = matrix(as.integer(c(1,4,2,0,4,1,4,3,1)), nrow = 3)
     mtrx_act = biproporz(input_matrix, 20)
@@ -108,7 +118,9 @@ test_that("free apportionment for districts", {
     # pukelsheim
     votes_df = unique(zug2018[c("list_id", "entity_name", "list_votes")])
     votes_matrix = pivot_to_matrix(votes_df)
-    x = biproporz(votes_matrix, 80)
+    x = biproporz(votes_matrix, 80, weight_votes = FALSE)
+    y = biproporz(votes_matrix, 80, weight_votes = TRUE)
+    expect_identical(x, y)
     expect_identical(sum(x), 80L)
 })
 
@@ -250,11 +262,32 @@ test_that("catch use_list_votes in ...", {
     expect_message(
         biproporz(uri2020$votes_matrix, uri2020$seats_vector, use_list_votes = FALSE),
         "The parameter `use_list_votes` has been renamed to `weight_votes`")
+    expect_false(getOption("proporz_use_list_votes_info"))
     expect_no_message(biproporz(uri2020$votes_matrix, uri2020$seats_vector, use_list_votes = FALSE))
     b1 = suppressMessages(
         biproporz(uri2020$votes_matrix, uri2020$seats_vector, use_list_votes = FALSE))
     b2 = biproporz(uri2020$votes_matrix, uri2020$seats_vector, weight_votes = FALSE)
     expect_identical(b1, b2)
+    options("proporz_use_list_votes_info" = NULL)
+})
+
+test_that("empty ...", {
+    expect_error_fixed(
+        biproporz(NULL, NULL, dummy = FALSE),
+        "Unknown argument ('dummy'). `...` must be empty")
+    expect_error_fixed(
+        pukelsheim(NULL, NULL, dummy1 = FALSE, dummy2 = NA),
+        "Unknown argument ('dummy1', 'dummy2'). `...` must be empty")
+    expect_error_fixed(
+        biproporz(NULL, NULL, dummy = FALSE, use_list_votes = FALSE),
+        "Unknown argument ('dummy'). `...` must be empty")
+    expect_true(is.null(getOption("proporz_use_list_votes_info")))
+
+    expect_error_fixed(
+        biproporz(uri2020$votes_matrix, uri2020$seats_vector,
+                  quorum_all(any_district = 0.1, total = 0.25), TRUE, "round",
+                  "more_args", list("even more")),
+        "`...` must be empty")
 })
 
 test_that("deprecated weight_list_votes", {
@@ -262,3 +295,5 @@ test_that("deprecated weight_list_votes", {
         weight_list_votes(M1, 1:3), class = "deprecatedWarning",
         "weight_list_votes has been renamed to weight_votes_matrix")
 })
+
+rm(M1, M2, suomi19_distr_seats, suomi19_votes, d1, d2, p1, p2)

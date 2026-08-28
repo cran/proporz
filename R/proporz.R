@@ -2,12 +2,11 @@
 #'
 #' Calculate seat apportionment for legislative bodies.
 #'
-#' @param votes numeric vector with number of votes for each party
-#' @param n_seats total number of seats
+#' @param votes Numeric vector with the number of votes for each party
+#' @param n_seats Total number of seats (integer)
 #' @param method Apportionment method to use, as character. Not case sensitive. See details.
-#' @param quorum Vote threshold a party must reach. Used as fraction of total
-#'               votes within if less than 1 otherwise as number
-#'               of votes.
+#' @param quorum Vote threshold a party must reach. Used as fraction of total votes if less
+#'   than 1, otherwise as number of votes.
 #'
 #' @details The following methods are available: `r .doc_proporz_methods()`
 #'
@@ -28,7 +27,7 @@
 #'
 #' proporz(votes, 10, "jefferson", quorum = 70)
 #'
-#'@export
+#' @export
 proporz = function(votes, n_seats, method, quorum = 0) {
     proporz_method = get_method_implementation(method)
     proporz_func = list(
@@ -43,12 +42,7 @@ proporz = function(votes, n_seats, method, quorum = 0) {
     proporz_func(votes, n_seats, quorum)
 }
 
-#' List of method names and their implementation
-#'
-#' Names can be used in [proporz()] or [biproporz()], the list entries
-#' denote the name of the implementation function.
-#' @returns Named list of methods
-#' @keywords internal
+# List of method names and their implementation
 proporz_methods = list(
     "d'hondt" = "divisor_floor",
     "jefferson" = "divisor_floor",
@@ -75,13 +69,14 @@ proporz_methods = list(
     "divisor_geometric" = "divisor_geometric"
 )
 
-get_method_implementation = function(method_name) {
-    method_name <- tolower(method_name)
-    if(!method_name %in% names(proporz_methods)) {
-        stop("Unknown apportion method: ", method_name, ".\nAvailable: ",
-             paste0(names(proporz_methods), collapse=", "), call. = FALSE)
+get_method_implementation = function(method) {
+    assert_char1(method)
+    method <- tolower(method)
+    if(!method %in% names(proporz_methods)) {
+        stop("Unknown apportion method: ", method, ".\nAvailable: ",
+             paste0(names(proporz_methods), collapse = ", "), call. = FALSE)
     }
-    return(proporz_methods[[method_name]])
+    return(proporz_methods[[method]])
 }
 
 # function to create the list of method names for the proporz documentation

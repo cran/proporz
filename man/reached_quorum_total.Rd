@@ -7,7 +7,7 @@
 reached_quorum_total(votes_matrix, quorum_total)
 }
 \arguments{
-\item{votes_matrix}{votes matrix}
+\item{votes_matrix}{Votes matrix}
 
 \item{quorum_total}{Vote threshold a party must reach for all votes cast.
 Used as fraction of total votes if less than 1, otherwise
@@ -26,7 +26,7 @@ minimal number of \emph{voters} (either as percentage or absolute value). In thi
 \code{\link[=weight_votes_matrix]{weight_votes_matrix()}} before calculating the quorum.
 }
 \examples{
-(vm = matrix(c(239, 10, 308, 398, 20, 925), nrow = 3))
+(vm <- matrix(c(239, 10, 308, 398, 20, 925), nrow = 3))
 reached_quorum_total(vm, 35)
 }
 \seealso{

@@ -19,9 +19,9 @@
 #' assignment to candidates.
 #'
 #' @inheritParams upper_apportionment
-#' @param quorum Optional list of functions which take the votes_matrix and return a logical
-#'   vector that denotes for each party/row whether they reached the quorum (i.e. are
-#'   eligible for seats). The easiest way to do this is via [quorum_any()] or
+#' @param quorum Optional list of functions which take the votes matrix and return a logical
+#'   vector that shows for each party/row whether they reached the quorum (i.e. are
+#'   eligible for seats). The easiest way to do this is by passing [quorum_any()] or
 #'   [quorum_all()], see examples. Alternatively you can pass a precalculated logical
 #'   vector. No quorum is applied if this parameter is missing or `NULL`.
 #' @param method Defines which method is used to assign seats. The following methods are
@@ -38,8 +38,8 @@
 #'   }
 #'   It is also possible to use any divisor method name listed in [proporz()]. If you want to
 #'   use a different method for the upper and lower apportionment, provide a list with two
-#'   entries.
-#' @param ... ignored (available for backwards compatibility)
+#'   method names.
+#' @param ... Ignored (used for backwards compatibility)
 #'
 #' @note The iterative process in the lower apportionment is only guaranteed to terminate
 #'   with the default Sainte-Laguë/Webster method.
@@ -50,21 +50,23 @@
 #'
 #' @seealso [pukelsheim()] for biproportional apportionment with `data.frames` as inputs.
 #'
-#' @returns Matrix with the same dimension as `votes_matrix` containing the number of seats
-#'   with the row and column divisors stored in attributes (hidden from print, see
-#'   [get_divisors()]).
+#' @returns Matrix with the same dimension as `votes_matrix` containing the number of seats.
+#'   Row/party and column/district divisors are stored in attributes (hidden from print(),
+#'   use [get_divisors()] or [summary()]).
 #'
 #' @examples
 #' votes_matrix = uri2020$votes_matrix
 #' district_seats = uri2020$seats_vector
 #'
-#' biproporz(votes_matrix, district_seats)
+#' (bp <- biproporz(votes_matrix, district_seats))
+#'
+#' # print divisors and seat sums with summary()
+#' summary(bp)
 #'
 #' # apply quorum (high values for illustrative purposes)
 #' biproporz(votes_matrix, district_seats,
 #'           quorum_all(any_district = 0.1, total = 0.25))
 #'
-#' @importFrom stats setNames
 #' @export
 biproporz = function(votes_matrix,
                      district_seats,
@@ -72,7 +74,8 @@ biproporz = function(votes_matrix,
                      weight_votes = TRUE,
                      method = "round",
                      ...) {
-    weight_votes <- catch_deprecated_use_list_votes(weight_votes, ...)
+    assert_empty_dots("use_list_votes", list(...))
+    weight_votes <- catch_deprecated_use_list_votes(weight_votes, list(...))
 
     # check parameters
     .vmn = deparse(substitute(votes_matrix))
@@ -90,7 +93,8 @@ biproporz = function(votes_matrix,
     upp_app = upper_apportionment(votes_matrix, district_seats, weight_votes, method[[1]])
 
     # lower apportionment (Unterzuteilung)
-    seats_matrix = lower_apportionment(votes_matrix, upp_app$district, upp_app$party, method[[2]])
+    seats_matrix = lower_apportionment(votes_matrix, seats_cols = upp_app[["district"]],
+                                       seats_rows = upp_app[["party"]], method[[2]])
 
     class(seats_matrix) <- c("proporz_matrix", class(seats_matrix))
     return(seats_matrix)
@@ -113,30 +117,31 @@ biproporz = function(votes_matrix,
 #' }
 #'
 #' Parties failing to reach quorums cannot get seats. This function does not handle seat
-#' assignment to candidates.
+#' assignment to candidates within party lists.
 #'
 #' If you want to use other apportion methods than Sainte-Laguë use [biproporz()].
 #'
-#' @param votes_df data.frame (long format) with 3 columns (actual colnames can differ):
+#' @param votes_df `data.frame` (long format) with 3 columns (actual colnames can differ):
 #'                 \enumerate{
 #'                   \item party id/name (character)
 #'                   \item district id/name (character)
 #'                   \item votes (numeric)
 #'                   }
-#' @param district_seats_df data.frame with 2 columns (actual colnames can differ):
+#' @param district_seats_df `data.frame` with 2 columns (actual colnames can differ):
 #'                          \enumerate{
 #'                            \item district id/name (character)
 #'                            \item number of seats for a district (numeric)
 #'                          }
 #' @inheritParams biproporz
-#' @param new_seats_col name of the new column
+#' @param new_seats_col Name of the new column
 #' @param weight_votes By default (`TRUE`) it is assumed that each voter in a district has
 #'   as many votes as there are seats in a district. Set to `FALSE` if `votes_df` shows the
 #'   number of _voters_ (e.g. because they can only vote for one party).
 #' @param winner_take_one Set to `TRUE` if the party that got the most votes in a district
 #'   must get _at least_ one seat ('Majorzbedingung') in this district. This only applies if
-#'   the district winnig party is entitled to a seat in the upper apportionment. Default is `FALSE`.
-#' @param ... ignored (available for backwards compatibility)
+#'   the district winning party is entitled to a seat in the upper apportionment.
+#'   Default is `FALSE`.
+#' @param ... Ignored (used for backwards compatibility)
 #'
 #' @seealso This function calls [biproporz()] after preparing the input data.
 #'
@@ -170,10 +175,12 @@ pukelsheim = function(votes_df, district_seats_df,
                       weight_votes = TRUE,
                       winner_take_one = FALSE,
                       ...) {
-    weight_votes <- catch_deprecated_use_list_votes(weight_votes, ...)
+    assert_empty_dots("use_list_votes", list(...))
+    weight_votes <- catch_deprecated_use_list_votes(weight_votes, list(...))
 
-    check_params.pukelsheim(votes_df, district_seats_df, new_seats_col, weight_votes, winner_take_one,
-                            deparse(substitute(votes_df)), deparse(substitute(district_seats_df)))
+    check_params.pukelsheim(
+        votes_df, district_seats_df, new_seats_col, weight_votes, winner_take_one,
+        deparse(substitute(votes_df)), deparse(substitute(district_seats_df)))
 
     # Create votes matrix
     votes_matrix = pivot_to_matrix(votes_df) # list_ids must be rows

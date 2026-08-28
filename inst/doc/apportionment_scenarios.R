@@ -56,7 +56,7 @@ df_bydistrict = data.frame(
 )
 
 # sort table by D'Hondt seats
-df_bydistrict <- df_bydistrict[order(df_bydistrict[[1]], decreasing = TRUE),] 
+df_bydistrict <- df_bydistrict[order(df_bydistrict[[1]], decreasing = TRUE),]
 
 # print parties with at least one seat
 knitr::kable(df_bydistrict[rowSums(df_bydistrict) > 0,])
@@ -78,8 +78,8 @@ shares <- shares[order(shares$difference),]
 shares
 
 ## ----biprop, results="hide"---------------------------------------------------
-seats_biproportional = biproporz(votes_matrix, 
-                                 district_seats, 
+seats_biproportional = biproporz(votes_matrix,
+                                 district_seats,
                                  weight_votes = FALSE)
 
 # show only parties with seats
@@ -102,7 +102,7 @@ seat_changes = seats_biproportional - bydistrict_v0
 knitr::kable(seat_changes[.parties_w_changes, .districts_w_changes])
 
 ## ----biprop_seats-------------------------------------------------------------
-full_biproportional = biproporz(votes_matrix, 
+full_biproportional = biproporz(votes_matrix,
                                 district_seats = sum(district_seats),
                                 weight_votes = FALSE)
 
@@ -113,11 +113,11 @@ rowSums(full_biproportional) - rowSums(seats_biproportional)
 colSums(full_biproportional) - colSums(seats_biproportional)
 
 ## ----uri----------------------------------------------------------------------
-seats_old_system = apply_proporz(uri2020$votes_matrix, 
-                                 uri2020$seats_vector, 
+seats_old_system = apply_proporz(uri2020$votes_matrix,
+                                 uri2020$seats_vector,
                                  "hagenbach-bischoff")
 
 seats_new_system = biproporz(uri2020$votes_matrix, uri2020$seats_vector)
 
-seats_new_system - seats_old_system
+addmargins(seats_new_system - seats_old_system)
 

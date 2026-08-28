@@ -1,13 +1,13 @@
 #' Rounding with predefined thresholds
 #'
 #' Round `x` up to `ceiling(x)` if `x-floor(x) >= threshold`,
-#' otherwise round down to `floor(x)`.
+#' otherwise round down to `floor(x)`. Used for all divisor methods.
 #'
-#' @param x numeric vector or matrix >= 0 (`NaN` is not supported)
-#' @param threshold threshold in \[0,1\] or "harmonic"/"geometric" to use
+#' @param x Numeric atomic vector or matrix with values >= 0 (`NaN` is not supported)
+#' @param threshold Numeric threshold value in \[0,1\] or "harmonic"/"geometric" to use
 #'   harmonic or geometric mean thresholds
 #'
-#' @returns the rounded vector or matrix
+#' @returns Rounded vector or matrix
 #'
 #' @examples
 #' ceil_at(c(0.5, 1.5, 2.49, 2.5, 2.51), 0.5)
@@ -19,7 +19,7 @@
 #' @export
 ceil_at = function(x, threshold) {
     assert(length(threshold) == 1 && !is.na(threshold))
-    assert(all(!is.na(x)) && all(is.numeric(x)) && all(x >= 0))
+    assert(!anyNA(x) && is.numeric(x) && all(x >= 0))
     values = c(x)
 
     if(is.numeric(threshold)) {
@@ -27,11 +27,11 @@ ceil_at = function(x, threshold) {
             stop("Threshold argument must be in [0,1]", call. = FALSE)
         }
         threshold <- floor(values) + threshold
-    } else if(threshold == "harmonic") {
+    } else if(identical(threshold, "harmonic")) {
         threshold <- threshold_harmonic(values)
-    } else if(threshold == "geometric") {
+    } else if(identical(threshold, "geometric")) {
         threshold <- threshold_geometric(values)
-    } else if(threshold == "0.5_at_least_one") { # not documented
+    } else if(identical(threshold, "0.5_at_least_one")) { # not documented
         threshold <- threshold_0.5_at_least_one(values)
     } else {
         stop('Numeric value, "harmonic" or "geometric" expected for threshold argument.',
@@ -67,7 +67,7 @@ threshold_harmonic = function(x) {
     x_floor = floor(x)
 
     harmonic = seq_harmonic(x_ceil, x_floor)
-    harmonic[x == 0] <- 0  # 0+eps has to be rounded to 1
+    harmonic[x == 0] <- 0 # 0+eps has to be rounded to 1
     return(harmonic)
 }
 
@@ -84,7 +84,7 @@ threshold_geometric = function(x) {
 }
 
 seq_geometric = function(nn, nn1 = nn-1) {
-    sqrt((nn1)*nn)
+    sqrt(nn1 * nn)
 }
 
 threshold_0.5_at_least_one = function(x) {

@@ -10,24 +10,31 @@ weight_votes_matrix(votes_matrix, district_seats)
 weight_list_votes(votes_matrix, district_seats)
 }
 \arguments{
-\item{votes_matrix}{votes matrix}
+\item{votes_matrix}{Votes matrix}
 
-\item{district_seats}{seats per district, vector with same length
+\item{district_seats}{Seats per district, vector with same length
 as \code{ncol(votes_matrix)} and names as \code{colnames(votes_matrix)}}
 }
 \value{
-the weighted \code{votes_matrix} which contains the number of voters (not rounded)
+The weighted \code{votes_matrix} with the number of voters (not rounded).
 }
 \description{
 Weight votes by dividing the votes matrix entries by the number
-of seats per district. This method is used in \code{\link[=upper_apportionment]{upper_apportionment()}} if
-\code{weight_votes} is \code{TRUE} (default).
+of seats per district. Votes in districts without seats are set
+to zero.
 }
 \note{
 \code{weight_list_votes()} has been renamed to \code{\link[=weight_votes_matrix]{weight_votes_matrix()}}
 in \code{v1.5.2} and is deprecated.
 }
 \examples{
+(vm <- matrix(c(20, 10, 8, 5), nrow = 2))
+weight_votes_matrix(vm, c(3, 2))
+
 weight_votes_matrix(uri2020$votes_matrix, uri2020$seats_vector)
 
+}
+\seealso{
+This method is used in \code{\link[=upper_apportionment]{upper_apportionment()}} if
+\code{weight_votes} is \code{TRUE} (default).
 }

@@ -2,30 +2,25 @@
 % Please edit documentation in R/quorum.R
 \name{reached_quorums}
 \alias{reached_quorums}
-\title{Apply a list of quorum functions to a votes matrix}
+\title{Apply a list of quorum functions to rows in a votes matrix}
 \usage{
 reached_quorums(votes_matrix, quorum_funcs)
 }
 \arguments{
-\item{votes_matrix}{votes matrix}
+\item{votes_matrix}{Votes matrix}
 
-\item{quorum_funcs}{List of quorum functions. If list, the attribute "type"
-must be set which indicates whether \code{ALL} or \code{ANY}
-(i.e. at least one) quorum must be reached.
-
-This is a low-level implementation for quorum calculations and is
-called within \code{\link[=biproporz]{biproporz()}}. There's generally no need to call it
-directly.}
+\item{quorum_funcs}{A function or a list of quorum functions. For lists, the attribute
+"type" must be set which indicates whether \code{ALL} or \code{ANY} (i.e. at least one) quorums
+must be reached.}
 }
 \value{
 Logical vector with length equal to the number of lists/parties (\code{votes_matrix}
 rows) showing whether they reached the quorum or not.
 }
 \description{
-Apply a list of quorum functions to a votes matrix
+Apply a list of quorum functions to rows in a votes matrix
 }
-\seealso{
-\code{\link[=quorum_functions]{quorum_functions}} to create a list of quorum
-functions.
+\note{
+This is an internal function for quorum calculations in \code{\link[=biproporz]{biproporz()}}.
 }
 \keyword{internal}

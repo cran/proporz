@@ -4,7 +4,7 @@
 #' This method provides easier access to divisors stored in
 #' `attributes(...)$divisors`.
 #'
-#' @param biproporz_result a matrix created by [biproporz()] or a
+#' @param biproporz_result A matrix created by [biproporz()] or a
 #'   data.frame created by [pukelsheim()]
 #'
 #' @returns The district and party divisors (named "districts" and "parties") in a list, each
@@ -15,7 +15,9 @@
 #' get_divisors(seats_matrix)
 #'
 #' seats_df = pukelsheim(pivot_to_df(uri2020$votes_matrix),
-#'                       data.frame(names(uri2020$seats_vector), uri2020$seats_vector))
+#'                       data.frame(names(uri2020$seats_vector),
+#'                       uri2020$seats_vector))
+#'
 #' get_divisors(seats_df)
 #'
 #' # summary() also prints the divisors for a biproporz matrix
@@ -72,7 +74,7 @@ n_digits = function(vec) {
         x1 = (vec*10^k)
         x2 = floor(x1)
         digits[(x1-x2) < 1e-8 & is.na(digits)] <- k
-        if(all(!is.na(digits))) break
+        if(!anyNA(digits)) break
     }
     return(digits)
 }

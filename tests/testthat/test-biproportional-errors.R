@@ -1,5 +1,3 @@
-expect_error_fixed = function(...) testthat::expect_error(..., fixed = TRUE)
-
 test_that("undefined result biproportional", {
     seats = c(10, 20, 1, 1)
     set.seed(1284)
@@ -14,7 +12,7 @@ test_that("undefined result biproportional", {
                        "Result is undefined, equal quotient for parties: 4, 6")
 
     expect_error_fixed(biproporz(uri2020$votes_matrix, uri2020$seats_vector, quorum_any(any_district = 0.7)),
-                       "Result is undefined, equal quotient for parties: 'CVP', 'SPGB', 'FDP', 'SVP'")
+                       "No votes in districts with at least one seat: 'Altdorf', 'Bürglen', 'Erstfeld', 'Schattdorf'")
 
     vm5 = matrix(c(10, 10, 10, 10), 2, 2)
     expect_error_fixed(biproporz(vm5, c(3,1)),
@@ -95,6 +93,13 @@ test_that("flow criterion check for almost empty matrix", {
         biproporz(matrix(c(1000,10,0,1), 2), c(1,1)),
         "Not enough seats for party 1 in district 1\n(2 seats necessary, 1 available)")
 
+    vm2b = matrix(c(0, 10, 0, 50, 0, 10, 40, 50, 0, 78, 54, 45), nrow = 3)
+    expect_no_condition(biproporz(vm2b, c(4, 3, 1, 0), weight_votes = TRUE))
+    expect_error_fixed(
+        biproporz(vm2b, c(4, 3, 1, 0), weight_votes = FALSE),
+        "Not enough seats for parties 1, 3 in districts 2, 3, 4\n(5 seats necessary, 4 available)"
+    )
+
     vm3a = matrix(c(4,3,0,20,1,0), nrow = 2)
     expect_error_fixed(
         biproporz(vm3a, c(1,3,4)),
@@ -159,7 +164,7 @@ test_that("error messages", {
     # unique party ids
     vdf_dupl = rbind(vdf, vdf[9:12,])
     expect_error_fixed(pukelsheim(vdf_dupl, seats_df),
-                       "There are duplicate party-district pairs in `vdf_dupl`.")
+                       "There are duplicate party-district pairs in `vdf_dupl`")
 
     # unique district ids
     expect_error_fixed(pukelsheim(vdf_dupl, rbind(seats_df, seats_df)),
@@ -193,6 +198,12 @@ test_that("error messages", {
     expect_error_fixed(pukelsheim(vdf_non_num, seats_df),
                        "Vote values in `vdf_non_num`s third column must be numbers >= 0")
 
+    seats_df_non_num = seats_df
+    seats_df_non_num$seats <- as.character(seats_df_non_num$seats)
+    expect_error_fixed(
+        pukelsheim(vdf, seats_df_non_num),
+        "Seat values in `seats_df_non_num`s second column must be numbers >= 0")
+
     # negative votes
     vdf_neg = vdf
     vdf_neg$votes <- vdf_neg$votes-500
@@ -217,7 +228,7 @@ test_that("error messages", {
     expect_error_fixed(biproporz(vm, seats, method = c("round", "floor", "ceiling")),
                        "Only one or two methods allowed")
     expect_error_fixed(biproporz(vm, seats, method = round),
-                       "Method must be a character or a list")
+                       "Method must be a single character or a list of two characters")
     expect_error_fixed(biproporz(vm, vm),
                        "`vm` must be a numeric vector, data.frame or a single number")
 
@@ -255,4 +266,22 @@ test_that("unique name checks", {
     colnames(vm_names)[2] <- NA
     expect_error_fixed(prep_district_seats(ds_dupl, vm_names, "distrdupl", "xy"),
                        "`distrdupl` must have unique names without NA's")
+})
+
+test_that("lower_apportionment name-matching", {
+    M = matrix(c(60, 30, 4, 70, 50, 40),
+               nrow = 3L, ncol = 2L,
+               dimnames = list(c("I", "II", "III"), c("A", "B")))
+    ds = c("B" = 5, "A" = 3)
+    ps = c("III" = 1, "I" = 4, "II" = 3)
+    expect_no_error(lower_apportionment(M, ds, ps))
+    expect_true(!identical(c(lower_apportionment(M, ds, ps)),
+                           c(lower_apportionment(unname(M), unname(ds), unname(ps)))))
+    expect_error(lower_apportionment(M, unname(ds), unname(ps)),
+                 "seats_cols must have the same names as the votes_matrix column")
+    expect_error(lower_apportionment(M, ds, unname(ps)),
+                 "seats_rows must have the same names as the votes_matrix rows")
+    names(ps)[2] <- "IV"
+    expect_error(lower_apportionment(M, ds, ps),
+                 "seats_rows must have the same names as the votes_matrix rows")
 })

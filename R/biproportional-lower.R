@@ -21,10 +21,10 @@
 #'     region is correct with the chosen rounding method.
 #' }
 #'
-#' @param votes_matrix matrix with votes by party in rows and votes by district in columns.
-#' @param seats_cols number of seats per column (districts/regions), predetermined or
+#' @param votes_matrix Matrix with votes by party in rows and votes by district in columns.
+#' @param seats_cols Number of seats per column (districts/regions), predetermined or
 #'   calculated with [upper_apportionment()].
-#' @param seats_rows number of seats per row (parties/lists), calculated with
+#' @param seats_rows Number of seats per row (parties/lists), calculated with
 #'   [upper_apportionment()].
 #' @param method Apportion method that defines how seats are assigned. The
 #'   following methods are supported:
@@ -83,12 +83,12 @@ lower_apportionment = function(votes_matrix, seats_cols,
                                seats_rows, method = "round") {
     # check parameters
     M = prep_votes_matrix(votes_matrix, deparse(substitute(votes_matrix)))
-    assert(all((seats_cols %% 1) == 0))
-    assert(all((seats_rows %% 1) == 0))
+    seats_cols <- prep_seats_cols(seats_cols, votes_matrix)
+    seats_rows <- prep_seats_rows(seats_rows, votes_matrix)
     assert(sum(seats_cols) == sum(seats_rows))
-    assert(length(seats_cols) == ncol(M) && length(seats_rows) == nrow(M))
 
     # rounding function from method
+    assert(is.function(method) || is_char1(method))
     if(is.function(method)) {
         round_func = method
     } else if(method == "round") {
@@ -120,18 +120,21 @@ lower_apportionment = function(votes_matrix, seats_cols,
 #' Calculate raw seat matrix
 #'
 #' Apply row and column divisors to matrix to get non-rounded seat values.
+#' Resulting `NA`, `NaN` or `Inf` values are set to zero.
 #'
-#' @param M matrix
-#' @param col_divisors divisors to apply to columns
-#' @param row_divisors divisors to apply to rows
+#' @param M Matrix
+#' @param col_divisors Divisors to apply to columns
+#' @param row_divisors Divisors to apply to rows
 #'
-#' @returns matrix with the same dimension as `M` containing non-rounded seat values
+#' @returns A matrix with the same dimension as `M` containing non-rounded seat values
+#'
+#' @note This is an internal function for [lower_apportionment()].
 #' @keywords internal
 divide_votes_matrix = function(M, col_divisors, row_divisors) {
     M_district = row_as_matrix(col_divisors, M)
     M_party = col_as_matrix(row_divisors, M)
 
-    d = M/M_district/M_party
+    d = M / M_district / M_party
     d[is.nan(d) | is.infinite(d) | is.na(d)] <- 0
     return(d)
 }
@@ -139,13 +142,15 @@ divide_votes_matrix = function(M, col_divisors, row_divisors) {
 #' Find divisors for a matrix with alternate scaling
 #'
 #' @param M votes_matrix
-#' @param seats_cols target seats for each column
-#' @param seats_rows target seats for each row
-#' @param round_func rounding function. Called like
+#' @param seats_cols Target seats for each column
+#' @param seats_rows Target seats for each row
+#' @param round_func Rounding function. Called like
 #'   `round_func(M/row_divisors/col_divisors)`, divisors are applied row/col-wise with
 #'   [divide_votes_matrix()].
 #'
 #' @returns list of divisors (column and row)
+#'
+#' @note This is an internal function for [lower_apportionment()].
 #' @keywords internal
 find_matrix_divisors = function(M, seats_cols, seats_rows, round_func) {
     assert(is.matrix(M))
@@ -183,17 +188,18 @@ find_matrix_divisors = function(M, seats_cols, seats_rows, round_func) {
     max_iter = getOption("proporz_max_iterations", 1000)
     target_diff_prev = sum(2*seats_cols)
     for(i in seq_len(max_iter)) {
-        # break conditions
         if(any(round_func(m.(M,dC,dR)) %% 1 != 0)) {
             stop("Rounding function does not return integers", call. = FALSE)
         }
+
+        # break conditions
         target_diff = sum(abs(mc(M,dC,dR) - seats_cols)) + sum(abs(mr(M,dC,dR) - seats_rows))
-        if(target_diff > target_diff_prev) {
+        if(target_diff == 0) {
+            return(list(cols = dC, rows = dR)) # solution found
+        } else if(target_diff > target_diff_prev) {
             stop("Result is undefined, cannot assign all seats in lower apportionment", call. = FALSE)
-        }
-        target_diff_prev <- target_diff
-        if(sum(target_diff) == 0) {
-            return(list(cols = dC, rows = dR))
+        } else {
+            target_diff_prev <- target_diff
         }
 
         # change party divisors
@@ -253,22 +259,24 @@ find_matrix_divisors = function(M, seats_cols, seats_rows, round_func) {
 #' Find a divisor between `divisor_from` and `divisor_to` such that
 #' `sum(round_func(votes/divisor))` equals `target_seats`
 #'
-#' @param votes votes (matrix with only one column or vector, allows to use row/colnames
+#' @param votes Votes (matrix with only one column or row, allows to use row/colnames
 #'   within `round_func`)
-#' @param divisor_from lower bound for divisor search range (is decreased if necessary)
-#' @param divisor_to upper bound for divisor search range (is increased if necessary)
-#' @param target_seats number of seats to distribute (single number)
-#' @param round_func rounding function
+#' @param divisor_from Lower bound for divisor search range (is decreased if necessary)
+#' @param divisor_to Upper bound for divisor search range (is increased if necessary)
+#' @param target_seats Number of seats to distribute (single number)
+#' @param round_func Rounding function
 #'
-#' @returns divisor
+#' @returns divisor (single number)
+#'
+#' @note This is an internal function for [find_matrix_divisors()].
 #' @keywords internal
 find_divisor = function(votes,
                         divisor_from, divisor_to,
                         target_seats, round_func) {
     assert(is.matrix(votes))
     assert(any(dim(votes) == 1))
-    assert(length(target_seats) == 1)
-    assert(all(!is.infinite(votes)) && all(!is.na(votes)))
+    assert(length(target_seats) == 1L)
+    assert(all(!is.infinite(votes)) && !anyNA(votes))
     assert(!is.na(divisor_from) && !is.na(divisor_to))
     assert(divisor_from > 0)
 
@@ -295,7 +303,7 @@ find_divisor = function(votes,
 }
 
 bisect = function(f, x1, x2, tol = 1e-9, max_iterations = 1000) {
-    assert(length(x1) == 1 && length(x2) == 1 && length(tol) == 1)
+    assert(length(x1) == 1L && length(x2) == 1L && length(tol) == 1L)
     assert((f(x1) <= 0 && f(x2) >= 0) || (f(x1) >= 0 && f(x2) <= 0))
     assert(x1 >= 0 && x2 >= 0 && x1 < x2)
     assert(!is.infinite(x1) && !is.infinite(x2))
@@ -313,4 +321,32 @@ bisect = function(f, x1, x2, tol = 1e-9, max_iterations = 1000) {
         }
     }
     stop("Exceeded maximum number of bisection iterations (", max_iterations, ")") # nocov
+}
+
+prep_seats_cols = function(seats_cols, votes_matrix) {
+    assert(is.numeric(seats_cols) && is.atomic(seats_cols))
+    assert(all((seats_cols %% 1) == 0))
+    assert(length(seats_cols) == ncol(votes_matrix))
+
+    if(!equal_names(colnames(votes_matrix), names(seats_cols))) {
+        stop("seats_cols must have the same names as the votes_matrix column", call. = FALSE)
+    }
+    if(!is.null(names(seats_cols))) {
+        seats_cols <- seats_cols[colnames(votes_matrix)]
+    }
+    return(seats_cols)
+}
+
+prep_seats_rows = function(seats_rows, votes_matrix) {
+    assert(is.numeric(seats_rows) && is.atomic(seats_rows))
+    assert(all((seats_rows %% 1) == 0))
+    assert(length(seats_rows) == nrow(votes_matrix))
+
+    if(!equal_names(rownames(votes_matrix), names(seats_rows))) {
+        stop("seats_rows must have the same names as the votes_matrix rows", call. = FALSE)
+    }
+    if(!is.null(names(seats_rows))) {
+        seats_rows <- seats_rows[rownames(votes_matrix)]
+    }
+    return(seats_rows)
 }

@@ -16,7 +16,7 @@ are named. If a single value is supplied (like \code{1} as default), it is used 
 seats for every district.}
 }
 \value{
-logical matrix with the same dimensions and names as \code{votes_matrix}
+Logical matrix with the same dimensions and names as \code{votes_matrix}
 }
 \description{
 Create a logical matrix that shows whether a party got the most votes in a district or not.
@@ -26,7 +26,8 @@ If two or more parties are tied and there are not enough seats for each tied par
 the matrix value is \code{NA}.
 }
 \examples{
-(vm = matrix(c(60,30,0,20,10,30), nrow = 3, dimnames = list(1:3, c("A", "B"))))
+(vm <- matrix(c(60,30,0,20,10,30),
+              nrow = 3, dimnames = list(1:3, c("A", "B"))))
 
 district_winner_matrix(vm)
 

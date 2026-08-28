@@ -1,3 +1,10 @@
+# proporz 1.5.3
+
+* feature: enable csv input/output in shiny app (`run_app()`)
+* bugfix: `biproporz()` and `upper_apportionment()`: `weight_votes` is ignored if number of seats is a single number
+* bugfix: assert vector-matrix name matching in `lower_apportionment()`
+* improved error handling and messages for input parameters
+
 # proporz 1.5.2
 
 * weight_list_votes() is deprecated, renamed  to `weight_votes_matrix()`

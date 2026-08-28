@@ -13,8 +13,8 @@ create_wto_round_function = function(votes_matrix, district_seats, seats_parties
     assert_no_duplicates(names(district_seats))
     assert_no_duplicates(names(seats_parties))
 
-    stopifnot(identical(colnames(votes_matrix), names(district_seats)))
-    stopifnot(identical(rownames(votes_matrix), names(seats_parties)))
+    assert(identical(colnames(votes_matrix), names(district_seats)))
+    assert(identical(rownames(votes_matrix), names(seats_parties)))
 
     DISTRICT_WINNERS = most_votes_in_district_matrix(votes_matrix)
 
@@ -56,7 +56,7 @@ create_wto_round_function = function(votes_matrix, district_seats, seats_parties
         # standard rounding for everyone else
         y_others = ceil_at(x_others, 0.5)
 
-        y = y_winners+y_others
+        y = y_winners + y_others
         dimnames(y) <- dimnames(x)
         return(y)
     }
@@ -74,7 +74,7 @@ create_wto_round_function = function(votes_matrix, district_seats, seats_parties
 #'   are named. If a single value is supplied (like `1` as default), it is used as the number of
 #'   seats for every district.
 #'
-#' @returns logical matrix with the same dimensions and names as `votes_matrix`
+#' @returns Logical matrix with the same dimensions and names as `votes_matrix`
 #'
 #' @details If two or more parties are tied and there are not enough seats for each tied party,
 #'   the matrix value is `NA`.
@@ -82,7 +82,8 @@ create_wto_round_function = function(votes_matrix, district_seats, seats_parties
 #' @export
 #'
 #' @examples
-#' (vm = matrix(c(60,30,0,20,10,30), nrow = 3, dimnames = list(1:3, c("A", "B"))))
+#' (vm <- matrix(c(60,30,0,20,10,30),
+#'               nrow = 3, dimnames = list(1:3, c("A", "B"))))
 #'
 #' district_winner_matrix(vm)
 #'
@@ -94,10 +95,14 @@ create_wto_round_function = function(votes_matrix, district_seats, seats_parties
 #' district_winner_matrix(vm, c(1, 2))
 district_winner_matrix = function(votes_matrix,
                                   district_seats = 1L) {
+    assert(is.matrix(votes_matrix) && ncol(votes_matrix) > 0)
+    assert(is.atomic(district_seats) && is.numeric(district_seats) && length(district_seats) >= 1)
     if(length(district_seats) == 1L) {
         district_seats <- rep(district_seats, ncol(votes_matrix))
     }
-    if(is.null(names(district_seats))) names(district_seats) <- colnames(votes_matrix)
+    if(is.null(names(district_seats))) {
+        names(district_seats) <- colnames(votes_matrix)
+    }
     .vmn = deparse(substitute(votes_matrix))
     .dsm = deparse(substitute(district_seats))
     votes_matrix <- prep_votes_matrix(votes_matrix, .vmn)

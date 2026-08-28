@@ -7,7 +7,7 @@
 reached_quorum_any_district(votes_matrix, quorum_districts)
 }
 \arguments{
-\item{votes_matrix}{votes matrix}
+\item{votes_matrix}{Votes matrix}
 
 \item{quorum_districts}{Vote threshold a party must reach in \emph{at least}
 one district. Used as fraction of total votes within a
@@ -22,7 +22,7 @@ rows) showing whether they reached the quorum or not.
 Base implementation, used by \code{\link[=quorum_functions]{quorum_functions}}.
 }
 \examples{
-(vm = matrix(c(239, 10, 308, 398, 20, 925), nrow = 3))
+(vm <- matrix(c(239, 10, 308, 398, 20, 925), nrow = 3))
 reached_quorum_any_district(vm, 25)
 }
 \seealso{

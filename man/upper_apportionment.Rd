@@ -15,16 +15,20 @@ upper_apportionment(
 \item{votes_matrix}{Vote count matrix with votes by party in rows and votes by district
 in columns.}
 
-\item{district_seats}{Vector defining the number of seats per district. Must be the same
+\item{district_seats}{\itemize{
+\item Vector defining the number of seats per district. Must be the same
 length as \code{ncol(votes_matrix)}. Values are name-matched to \code{votes_matrix} columns if both
-are named. If the number of seats per district should be calculated according to the number
-of votes (not the general use case), a single number for the total number of seats can be
-used.}
+are named.
+\item If the number of seats per district should be calculated according to the number
+of votes, a single number for the total number of seats can be used. \code{weight_votes} will be
+ignored, as \code{votes_matrix} shows the number of voters.
+Note that apportioning district seats according to votes is not the general use case.
+}}
 
 \item{weight_votes}{By default (\code{TRUE}) it is assumed that each voter in a district has
 as many votes as there are seats in a district. Thus, votes are weighted according to
 the number of available district seats with \code{\link[=weight_votes_matrix]{weight_votes_matrix()}}. Set to \code{FALSE} if
-the argument \code{votes_matrix} shows the number of \emph{voters} (e.g. because they can only cast
+\code{votes_matrix} shows the number of \emph{voters} (e.g. because they can only cast
 one vote for one party).}
 
 \item{method}{Apportion method that defines how seats are assigned, see \code{\link[=proporz]{proporz()}}. Default

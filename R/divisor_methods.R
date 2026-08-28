@@ -10,7 +10,7 @@
 #' available. (\href{https://en.wikipedia.org/wiki/Highest_averages_method}{Wikipedia})
 #'
 #' @inheritParams proporz
-#' @param divisors sequence of divisors (length equal to the number of seats).
+#' @param divisors Sequence of divisors (length equal to the number of seats).
 #'                 If it is a single number (e.g. 0.5), a sequence is generated
 #'                 starting with it, increasing by 1.
 #'
@@ -19,23 +19,21 @@
 #' @examples
 #' highest_averages_method(c(5200, 1700, 3100), 15, 0.5)
 #'
-#' highest_averages_method(votes = c(50, 0, 30), n_seats = 3,
+#' highest_averages_method(votes = c(A = 50, B = 0, C = 30),
+#'                         n_seats = 3,
 #'                         divisors = c(0, 1.3333, 2.4))
 #' @export
 highest_averages_method = function(votes, n_seats, divisors) {
     check_votes_vector(votes, deparse(substitute(votes)))
     check_seats_number(n_seats, deparse(substitute(n_seats)))
 
-    if(length(votes) == 1) { return(n_seats) }
-    assert(all(!is.na(votes)))
-    if(n_seats == 0) { return(rep(0L, length(votes))) }
+    # catch trivial cases
+    if(length(votes) == 1) return(n_seats)
+    assert(!anyNA(votes))
+    if(n_seats == 0) return(rep(0L, length(votes)))
 
-    assert(is.null(dim(divisors)))
-    if(length(divisors) == 1) {
-        divisors <- seq(from = divisors, by = 1, length.out = n_seats)
-    } else if(length(divisors) != n_seats) {
-        stop("Number of divisors is not equal to the number of seats", call. = FALSE)
-    }
+    # setup params
+    divisors <- prep_divisor_param(divisors, n_seats)
     n_parties = length(votes)
 
     # method
@@ -43,7 +41,7 @@ highest_averages_method = function(votes, n_seats, divisors) {
     colnames(mtrx_votes) <- names(votes)
     mtrx_divisors = matrix(rep(divisors, ncol(mtrx_votes)), ncol = n_parties)
 
-    mtrx_quotient = mtrx_votes/mtrx_divisors
+    mtrx_quotient = mtrx_votes / mtrx_divisors
     check_edge_quotient(mtrx_quotient, n_seats)
 
     # assign seats
@@ -140,4 +138,16 @@ divisor_ceiling = function(votes, n_seats, quorum = 0) {
     votes <- apply_quorum_vector(votes, quorum)
     check_enough_seats(votes, n_seats, "ceiling")
     highest_averages_method(votes, n_seats, 0)
+}
+
+prep_divisor_param = function(divisors, n_seats) {
+    assert(is.null(dim(divisors)))
+    assert(is.numeric(divisors))
+    assert(divisors >= 0)
+    if(length(divisors) == 1L) {
+        divisors <- seq(from = divisors, by = 1, length.out = n_seats)
+    } else if(length(divisors) != n_seats) {
+        stop("Number of divisors is not equal to the number of seats", call. = FALSE)
+    }
+    return(divisors)
 }

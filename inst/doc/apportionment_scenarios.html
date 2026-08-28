@@ -694,7 +694,7 @@ the number of party seats on the national level with
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co"># sort table by D&#39;Hondt seats</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>df_bydistrict <span class="ot">&lt;-</span> df_bydistrict[<span class="fu">order</span>(df_bydistrict[[<span class="dv">1</span>]], <span class="at">decreasing =</span> <span class="cn">TRUE</span>),] </span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>df_bydistrict <span class="ot">&lt;-</span> df_bydistrict[<span class="fu">order</span>(df_bydistrict[[<span class="dv">1</span>]], <span class="at">decreasing =</span> <span class="cn">TRUE</span>),]</span>
 <span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
 <span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># print parties with at least one seat</span></span>
 <span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(df_bydistrict[<span class="fu">rowSums</span>(df_bydistrict) <span class="sc">&gt;</span> <span class="dv">0</span>,])</span></code></pre></div>
@@ -839,8 +839,8 @@ already. We need to consider that voters in Finland can only vote for
 votes as there are seats in their district among candidates/parties.
 Thus we need to use <code>weight_votes = FALSE</code> as a parameter in
 <code>biproporz</code>.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>seats_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, </span>
-<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                                 district_seats, </span>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>seats_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>                                 district_seats,</span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>                                 <span class="at">weight_votes =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a></span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co"># show only parties with seats</span></span>
@@ -1320,7 +1320,7 @@ the number of seats per district, based on the actual votes cast in
 every district. This way, each districts seat share is proportional to
 its vote share. To do this, we use the total number of seats for the
 <code>district_seats</code> parameter.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>full_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix, </span>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>full_biproportional <span class="ot">=</span> <span class="fu">biproporz</span>(votes_matrix,</span>
 <span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>                                <span class="at">district_seats =</span> <span class="fu">sum</span>(district_seats),</span>
 <span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>                                <span class="at">weight_votes =</span> <span class="cn">FALSE</span>)</span>
 <span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
@@ -1354,18 +1354,19 @@ parliament was elected with biproportional apportionment for some
 municipalities. Previously, these four municipalities used the
 <em>Hagenbach-Bischoff</em> method. We’ll ignore all other
 municipalities which use a majoritarian electoral system.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>seats_old_system <span class="ot">=</span> <span class="fu">apply_proporz</span>(uri2020<span class="sc">$</span>votes_matrix, </span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                                 uri2020<span class="sc">$</span>seats_vector, </span>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>seats_old_system <span class="ot">=</span> <span class="fu">apply_proporz</span>(uri2020<span class="sc">$</span>votes_matrix,</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                                 uri2020<span class="sc">$</span>seats_vector,</span>
 <span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>                                 <span class="st">&quot;hagenbach-bischoff&quot;</span>)</span>
 <span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a></span>
 <span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>seats_new_system <span class="ot">=</span> <span class="fu">biproporz</span>(uri2020<span class="sc">$</span>votes_matrix, uri2020<span class="sc">$</span>seats_vector)</span>
 <span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>seats_new_system <span class="sc">-</span> seats_old_system</span>
-<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt;      Altdorf Bürglen Erstfeld Schattdorf</span></span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; CVP        1       0        0          0</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; SPGB      -1       0        0          0</span></span>
-<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; FDP        0       0        0          0</span></span>
-<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; SVP        0       0        0          0</span></span></code></pre></div>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="fu">addmargins</span>(seats_new_system <span class="sc">-</span> seats_old_system)</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co">#&gt;      Altdorf Bürglen Erstfeld Schattdorf Sum</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; CVP        1       0        0          0   1</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; SPGB      -1       0        0          0  -1</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt; FDP        0       0        0          0   0</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt; SVP        0       0        0          0   0</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt; Sum        0       0        0          0   0</span></span></code></pre></div>
 <p>Compared to the previous election system there was a change of one
 seat (out of 37).</p>
 </div>
