@@ -28,11 +28,10 @@ pukelsheim(
 \item number of seats for a district (numeric)
 }}
 
-\item{quorum}{Optional list of functions which take the votes matrix and return a logical
-vector that shows for each party/row whether they reached the quorum (i.e. are
-eligible for seats). The easiest way to do this is by passing \code{\link[=quorum_any]{quorum_any()}} or
-\code{\link[=quorum_all]{quorum_all()}}, see examples. Alternatively you can pass a precalculated logical
-vector. No quorum is applied if this parameter is missing or \code{NULL}.}
+\item{quorum}{Optional list of quorum parameters that describe how quorums should be applied
+prior to seat distributions, created with \code{\link[=quorum_any]{quorum_any()}} or \code{\link[=quorum_all]{quorum_all()}}, see examples.
+Alternatively you can pass a precalculated logical vector.
+No quorum is applied if this parameter is missing or \code{NULL}.}
 
 \item{new_seats_col}{Name of the new column}
 
@@ -49,8 +48,8 @@ Default is \code{FALSE}.}
 }
 \value{
 A data.frame like \code{votes_df} with a new column denoting the number of seats per
-party and district. Party and district divisors stored in attributes (hidden from print,
-see \code{\link[=get_divisors]{get_divisors()}}). An ungrouped tibble is returned if \code{votes_df} is a tibble.
+party and district. Party and district divisors are stored in attributes (hidden from
+print, see \code{\link[=get_divisors]{get_divisors()}}). An ungrouped tibble is returned if \code{votes_df} is a tibble.
 }
 \description{
 Method to proportionally allocate seats among parties/lists and
@@ -78,18 +77,21 @@ If you want to use other apportion methods than Sainte-Laguë use \code{\link[=b
 votes_df = unique(zug2018[c("list_id", "entity_id", "list_votes")])
 district_seats_df = unique(zug2018[c("entity_id", "election_mandates")])
 
-seats_df = pukelsheim(votes_df,
-                      district_seats_df,
-                      quorum_any(any_district = 0.05, total = 0.03),
-                      winner_take_one = TRUE)
+seats_df = pukelsheim(
+    votes_df,
+    district_seats_df,
+    quorum_any(votes_any_district = 0.05, total_voters = 0.03),
+    winner_take_one = TRUE)
 
 head(seats_df)
 
 # Finland 2019
-finland19_result = pukelsheim(finland2019$votes_df,
-                             finland2019$district_seats_df,
-                             new_seats_col = "mandates",
-                             weight_votes = FALSE)
+finland19_result = pukelsheim(
+    finland2019$votes_df,
+    finland2019$district_seats_df,
+    new_seats_col = "mandates",
+    weight_votes = FALSE)
+
 tail(finland19_result[order(finland19_result$mandates),])
 
 }
